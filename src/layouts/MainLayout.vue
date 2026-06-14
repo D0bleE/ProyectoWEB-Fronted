@@ -30,6 +30,13 @@
           <q-item-section>Billeteras</q-item-section>
         </q-item>
 
+        <q-item clickable v-ripple to="/cuentas-bancarias">
+          <q-item-section avatar>
+            <q-icon name="account_balance" />
+          </q-item-section>
+          <q-item-section> Cuentas Bancarias </q-item-section>
+        </q-item>
+
         <q-separator class="q-my-md" />
 
         <q-item clickable v-ripple @click="logout">
