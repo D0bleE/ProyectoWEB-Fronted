@@ -27,6 +27,11 @@ const routes = [
         component: () => import('pages/dashboard/DashboardPage.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: 'billeteras',
+        component: () => import('pages/billeteras/BilleterasPage.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
 
