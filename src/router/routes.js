@@ -32,6 +32,12 @@ const routes = [
         component: () => import('pages/billeteras/BilleterasPage.vue'),
         meta: { requiresAuth: true },
       },
+
+      {
+        path: 'cuentas-bancarias',
+        component: () => import('pages/cuentas/CuentasBancariasPage.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
 
