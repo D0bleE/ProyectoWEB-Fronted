@@ -18,13 +18,8 @@
         <q-card class="q-pa-md wallet-card">
           <div class="row items-center justify-between">
             <div>
-              <div class="text-h6">
-                {{ billetera.monedaCodigo }}
-              </div>
-
-              <div class="text-grey-7">
-                {{ billetera.monedaNombre }}
-              </div>
+              <div class="text-h6">{{ billetera.monedaCodigo }}</div>
+              <div class="text-grey-7">{{ billetera.monedaNombre }}</div>
             </div>
 
             <div class="row items-center q-gutter-sm">
@@ -49,7 +44,6 @@
 
           <div v-if="billetera.saldoBloqueado > 0">
             <div class="text-grey-7">Saldo bloqueado</div>
-
             <div class="text-orange-8 text-h6">
               {{ billetera.monedaSimbolo }}
               {{ billetera.saldoBloqueado.toFixed(2) }}
@@ -57,7 +51,14 @@
           </div>
 
           <div class="row q-gutter-sm q-mt-md">
-            <q-btn color="primary" icon="add" label="Recargar" size="sm" />
+            <q-btn
+              color="primary"
+              icon="add"
+              label="Recargar"
+              size="sm"
+              @click="abrirRecarga(billetera)"
+            />
+
             <q-btn outline color="negative" icon="remove" label="Retirar" size="sm" />
           </div>
         </q-card>
@@ -71,6 +72,57 @@
       No se encontraron billeteras para este usuario.
     </q-banner>
 
+    <q-dialog v-model="modalRecarga">
+      <q-card style="width: 430px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">Solicitar recarga</div>
+          <div class="text-grey-7">
+            {{ billeteraSeleccionada?.monedaCodigo }} -
+            {{ billeteraSeleccionada?.monedaNombre }}
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-input
+            outlined
+            v-model.number="formRecarga.monto"
+            label="Monto a recargar"
+            type="number"
+            class="q-mb-md"
+          />
+
+          <q-file
+            outlined
+            v-model="formRecarga.voucher"
+            label="Subir voucher"
+            accept=".jpg,.jpeg,.png,.pdf"
+            class="q-mb-md"
+            clearable
+            use-chips
+          >
+            <template #prepend>
+              <q-icon name="attach_file" />
+            </template>
+          </q-file>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+
+          <q-btn
+            color="primary"
+            label="Enviar solicitud"
+            :loading="savingRecarga"
+            @click="guardarRecarga"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-banner v-if="message" class="bg-green-1 text-positive q-mt-md rounded-borders">
+      {{ message }}
+    </q-banner>
+
     <q-banner v-if="errorMessage" class="bg-red-1 text-negative q-mt-md rounded-borders">
       {{ errorMessage }}
     </q-banner>
@@ -78,12 +130,23 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 import { obtenerSaldosPorUsuario } from 'src/services/billeteras.service'
+import { solicitarRecarga } from 'src/services/movimientos.service'
 
 const billeteras = ref([])
 const loading = ref(false)
 const errorMessage = ref('')
+const message = ref('')
+
+const modalRecarga = ref(false)
+const savingRecarga = ref(false)
+const billeteraSeleccionada = ref(null)
+
+const formRecarga = ref({
+  monto: null,
+  voucher: null,
+})
 
 const usuarioId = localStorage.getItem('userId')
 
@@ -96,6 +159,64 @@ const cargarBilleteras = async () => {
     errorMessage.value = 'No se pudieron cargar las billeteras.'
   } finally {
     loading.value = false
+  }
+}
+
+const abrirRecarga = (billetera) => {
+  message.value = ''
+  errorMessage.value = ''
+  billeteraSeleccionada.value = billetera
+
+  formRecarga.value = {
+    monto: null,
+    voucher: null,
+  }
+
+  modalRecarga.value = true
+}
+
+const guardarRecarga = async () => {
+  message.value = ''
+  errorMessage.value = ''
+
+  if (!formRecarga.value.monto || formRecarga.value.monto <= 0) {
+    errorMessage.value = 'El monto debe ser mayor a cero.'
+    return
+  }
+
+  if (!formRecarga.value.voucher) {
+    errorMessage.value = 'Adjunta el voucher de pago.'
+    return
+  }
+
+  try {
+    savingRecarga.value = true
+
+    const formData = new FormData()
+
+    const rawVoucher = toRaw(formRecarga.value.voucher)
+    const voucherFile = Array.isArray(rawVoucher) ? rawVoucher[0] : rawVoucher
+
+    formData.append('usuarioId', String(usuarioId))
+    formData.append('monedaId', String(billeteraSeleccionada.value.monedaId))
+    formData.append('monto', String(formRecarga.value.monto))
+    formData.append('voucher', voucherFile, voucherFile.name)
+
+    const response = await solicitarRecarga(formData)
+
+    message.value = response.message || 'Solicitud enviada correctamente.'
+    modalRecarga.value = false
+
+    await cargarBilleteras()
+  } catch (error) {
+    console.error(error.response?.data || error)
+
+    errorMessage.value =
+      error.response?.data?.message ||
+      error.response?.data?.errors?.voucher?.[0] ||
+      'No se pudo solicitar la recarga.'
+  } finally {
+    savingRecarga.value = false
   }
 }
 
