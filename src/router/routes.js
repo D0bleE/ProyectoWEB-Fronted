@@ -38,6 +38,18 @@ const routes = [
         component: () => import('pages/cuentas/CuentasBancariasPage.vue'),
         meta: { requiresAuth: true },
       },
+
+      {
+        path: 'admin/movimientos',
+        component: () => import('pages/admin/AdminMovimientosPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
+
+      {
+        path: 'admin',
+        component: () => import('pages/admin/AdminPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
     ],
   },
 

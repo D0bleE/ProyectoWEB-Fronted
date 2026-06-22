@@ -37,6 +37,13 @@
           <q-item-section> Cuentas Bancarias </q-item-section>
         </q-item>
 
+        <q-item v-if="userRole === 'ADM'" clickable v-ripple to="/admin">
+          <q-item-section avatar>
+            <q-icon name="admin_panel_settings" />
+          </q-item-section>
+          <q-item-section>Admin Movimientos</q-item-section>
+        </q-item>
+
         <q-separator class="q-my-md" />
 
         <q-item clickable v-ripple @click="logout">
@@ -62,6 +69,7 @@ const router = useRouter()
 const leftDrawerOpen = ref(false)
 
 const userName = localStorage.getItem('userName') || 'Usuario'
+const userRole = localStorage.getItem('userRole') || 'USR'
 
 const logout = () => {
   localStorage.clear()
