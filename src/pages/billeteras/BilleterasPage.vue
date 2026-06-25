@@ -59,7 +59,14 @@
               @click="abrirRecarga(billetera)"
             />
 
-            <q-btn outline color="negative" icon="remove" label="Retirar" size="sm" />
+            <q-btn
+              outline
+              color="negative"
+              icon="remove"
+              label="Retirar"
+              size="sm"
+              @click="abrirRetiro(billetera)"
+            />
           </div>
         </q-card>
       </div>
@@ -119,6 +126,58 @@
       </q-card>
     </q-dialog>
 
+    <q-dialog v-model="modalRetiro">
+      <q-card style="width: 460px; max-width: 90vw">
+        <q-card-section>
+          <div class="text-h6">Solicitar retiro</div>
+          <div class="text-grey-7">
+            {{ billeteraSeleccionada?.monedaCodigo }} - Disponible:
+            {{ billeteraSeleccionada?.monedaSimbolo }}
+            {{ billeteraSeleccionada?.saldoDisponible?.toFixed(2) }}
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-input
+            outlined
+            v-model.number="formRetiro.monto"
+            label="Monto a retirar"
+            type="number"
+            class="q-mb-md"
+          />
+
+          <q-select
+            outlined
+            v-model="formRetiro.cuentaId"
+            :options="cuentasFiltradas"
+            option-label="label"
+            option-value="id"
+            emit-value
+            map-options
+            label="Cuenta bancaria"
+          />
+
+          <q-banner
+            v-if="cuentasFiltradas.length === 0"
+            class="bg-orange-1 text-orange-9 q-mt-md rounded-borders"
+          >
+            No tienes cuentas bancarias registradas para esta moneda.
+          </q-banner>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
+
+          <q-btn
+            color="negative"
+            label="Enviar solicitud"
+            :loading="savingRetiro"
+            @click="guardarRetiro"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <q-banner v-if="message" class="bg-green-1 text-positive q-mt-md rounded-borders">
       {{ message }}
     </q-banner>
@@ -130,9 +189,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref, toRaw } from 'vue'
+import { computed, onMounted, ref, toRaw } from 'vue'
 import { obtenerSaldosPorUsuario } from 'src/services/billeteras.service'
-import { solicitarRecarga } from 'src/services/movimientos.service'
+import { obtenerCuentasPorUsuario } from 'src/services/cuentas.service'
+import { solicitarRecarga, solicitarRetiro } from 'src/services/movimientos.service'
 
 const billeteras = ref([])
 const loading = ref(false)
@@ -141,6 +201,11 @@ const message = ref('')
 
 const modalRecarga = ref(false)
 const savingRecarga = ref(false)
+
+const modalRetiro = ref(false)
+const savingRetiro = ref(false)
+const cuentasBancarias = ref([])
+
 const billeteraSeleccionada = ref(null)
 
 const formRecarga = ref({
@@ -148,7 +213,23 @@ const formRecarga = ref({
   voucher: null,
 })
 
+const formRetiro = ref({
+  monto: null,
+  cuentaId: null,
+})
+
 const usuarioId = localStorage.getItem('userId')
+
+const cuentasFiltradas = computed(() => {
+  if (!billeteraSeleccionada.value) return []
+
+  return cuentasBancarias.value
+    .filter((cuenta) => cuenta.monedaCodigo === billeteraSeleccionada.value.monedaCodigo)
+    .map((cuenta) => ({
+      id: cuenta.id,
+      label: `${cuenta.banco} - ${cuenta.numeroCuenta}`,
+    }))
+})
 
 const cargarBilleteras = async () => {
   try {
@@ -173,6 +254,25 @@ const abrirRecarga = (billetera) => {
   }
 
   modalRecarga.value = true
+}
+
+const abrirRetiro = async (billetera) => {
+  message.value = ''
+  errorMessage.value = ''
+  billeteraSeleccionada.value = billetera
+
+  formRetiro.value = {
+    monto: null,
+    cuentaId: null,
+  }
+
+  try {
+    cuentasBancarias.value = await obtenerCuentasPorUsuario(usuarioId)
+    modalRetiro.value = true
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = 'No se pudieron cargar tus cuentas bancarias.'
+  }
 }
 
 const guardarRecarga = async () => {
@@ -217,6 +317,53 @@ const guardarRecarga = async () => {
       'No se pudo solicitar la recarga.'
   } finally {
     savingRecarga.value = false
+  }
+}
+
+const guardarRetiro = async () => {
+  message.value = ''
+  errorMessage.value = ''
+
+  if (!formRetiro.value.monto || formRetiro.value.monto <= 0) {
+    errorMessage.value = 'El monto debe ser mayor a cero.'
+    return
+  }
+
+  if (formRetiro.value.monto > billeteraSeleccionada.value.saldoDisponible) {
+    errorMessage.value = 'No cuentas con saldo disponible suficiente.'
+    return
+  }
+
+  if (cuentasFiltradas.value.length === 0) {
+    errorMessage.value = 'No tienes una cuenta bancaria registrada para esta moneda.'
+    return
+  }
+
+  if (!formRetiro.value.cuentaId) {
+    errorMessage.value = 'Selecciona una cuenta bancaria.'
+    return
+  }
+
+  try {
+    savingRetiro.value = true
+
+    const response = await solicitarRetiro({
+      usuarioId: Number(usuarioId),
+      monedaId: Number(billeteraSeleccionada.value.monedaId),
+      monto: Number(formRetiro.value.monto),
+      rutaVoucher: null,
+    })
+
+    message.value = response.message || 'Solicitud de retiro enviada correctamente.'
+    modalRetiro.value = false
+
+    await cargarBilleteras()
+  } catch (error) {
+    console.error(error.response?.data || error)
+
+    errorMessage.value = error.response?.data?.message || 'No se pudo solicitar el retiro.'
+  } finally {
+    savingRetiro.value = false
   }
 }
 
