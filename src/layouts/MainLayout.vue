@@ -37,6 +37,13 @@
           <q-item-section> Cuentas Bancarias </q-item-section>
         </q-item>
 
+        <q-item clickable v-ripple to="/mercado">
+          <q-item-section avatar>
+            <q-icon name="currency_exchange" />
+          </q-item-section>
+          <q-item-section>Mercado P2P</q-item-section>
+        </q-item>
+
         <q-item v-if="userRole === 'ADM'" clickable v-ripple to="/admin">
           <q-item-section avatar>
             <q-icon name="admin_panel_settings" />
