@@ -50,6 +50,12 @@ const routes = [
         component: () => import('pages/admin/AdminPage.vue'),
         meta: { requiresAuth: true, requiresAdmin: true },
       },
+
+      {
+        path: 'mercado',
+        component: () => import('pages/ofertas/MercadoPage.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
 
