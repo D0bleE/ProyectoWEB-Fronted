@@ -15,6 +15,18 @@ const routes = [
         path: 'register',
         component: () => import('pages/auth/RegisterPage.vue'),
       },
+
+      {
+        path: 'ofertas/crear',
+        component: () => import('pages/ofertas/CrearOfertaPage.vue'),
+        meta: { requiresAuth: true },
+      },
+
+      {
+        path: 'mis-ofertas',
+        component: () => import('pages/ofertas/MisOfertasPage.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
 
