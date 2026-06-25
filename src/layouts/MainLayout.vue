@@ -44,6 +44,20 @@
           <q-item-section>Mercado P2P</q-item-section>
         </q-item>
 
+        <q-item clickable v-ripple to="/ofertas/crear">
+          <q-item-section avatar>
+            <q-icon name="add_business" />
+          </q-item-section>
+          <q-item-section>Crear Oferta</q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/mis-ofertas">
+          <q-item-section avatar>
+            <q-icon name="list_alt" />
+          </q-item-section>
+          <q-item-section>Mis Ofertas</q-item-section>
+        </q-item>
+
         <q-item v-if="userRole === 'ADM'" clickable v-ripple to="/admin">
           <q-item-section avatar>
             <q-icon name="admin_panel_settings" />
