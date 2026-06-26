@@ -15,18 +15,6 @@ const routes = [
         path: 'register',
         component: () => import('pages/auth/RegisterPage.vue'),
       },
-
-      {
-        path: 'ofertas/crear',
-        component: () => import('pages/ofertas/CrearOfertaPage.vue'),
-        meta: { requiresAuth: true },
-      },
-
-      {
-        path: 'mis-ofertas',
-        component: () => import('pages/ofertas/MisOfertasPage.vue'),
-        meta: { requiresAuth: true },
-      },
     ],
   },
 
@@ -44,35 +32,41 @@ const routes = [
         component: () => import('pages/billeteras/BilleterasPage.vue'),
         meta: { requiresAuth: true },
       },
-
       {
         path: 'cuentas-bancarias',
         component: () => import('pages/cuentas/CuentasBancariasPage.vue'),
         meta: { requiresAuth: true },
       },
-
-      {
-        path: 'admin/movimientos',
-        component: () => import('pages/admin/AdminMovimientosPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true },
-      },
-
-      {
-        path: 'admin',
-        component: () => import('pages/admin/AdminPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true },
-      },
-
       {
         path: 'mercado',
         component: () => import('pages/ofertas/MercadoPage.vue'),
         meta: { requiresAuth: true },
       },
+      {
+        path: 'ofertas/crear',
+        component: () => import('pages/ofertas/CrearOfertaPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'mis-ofertas',
+        component: () => import('pages/ofertas/MisOfertasPage.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'admin',
+        component: () => import('pages/admin/AdminPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
+      {
+        path: 'admin/movimientos',
+        component: () => import('pages/admin/AdminMovimientosPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
     ],
   },
 
   {
-    path: '/:catchAll(.)',
+    path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
 ]
