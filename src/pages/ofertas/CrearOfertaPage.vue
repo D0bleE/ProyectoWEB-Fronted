@@ -16,7 +16,36 @@
         label="Moneda que ofreces"
         class="q-mb-sm"
         @update:model-value="alCambiarMonedas"
-      />
+      >
+        <template #option="scope">
+          <q-item v-bind="scope.itemProps">
+            <q-item-section avatar>
+              <q-avatar size="32px">
+                <img :src="scope.opt.bandera" />
+              </q-avatar>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label> {{ scope.opt.codigo }} - {{ scope.opt.nombre }} </q-item-label>
+              <q-item-label caption>
+                Saldo disponible:
+                <span class="text-teal-7 text-weight-bold">
+                  {{ scope.opt.simbolo }} {{ scope.opt.saldo.toFixed(2) }}
+                </span>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
+
+        <template #selected-item="scope">
+          <div class="row items-center q-gutter-sm">
+            <q-avatar size="24px">
+              <img :src="scope.opt.bandera" />
+            </q-avatar>
+            <span>{{ scope.opt.codigo }} - {{ scope.opt.nombre }}</span>
+          </div>
+        </template>
+      </q-select>
 
       <div v-if="monedaOrigen" class="text-grey-7 q-mb-md">
         Saldo disponible:
@@ -32,8 +61,12 @@
         v-model.number="form.montoOrigen"
         label="Monto a ofrecer"
         type="number"
-        class="q-mb-md"
+        class="q-mb-sm"
       />
+
+      <q-banner v-if="montoSuperaSaldo" class="bg-red-1 text-negative q-mb-md rounded-borders">
+        El monto ingresado supera tu saldo disponible.
+      </q-banner>
 
       <q-select
         outlined
@@ -46,13 +79,40 @@
         label="Moneda que deseas recibir"
         class="q-mb-md"
         @update:model-value="alCambiarMonedas"
-      />
+      >
+        <template #option="scope">
+          <q-item v-bind="scope.itemProps">
+            <q-item-section avatar>
+              <q-avatar size="32px">
+                <img :src="scope.opt.bandera" />
+              </q-avatar>
+            </q-item-section>
 
-      <div v-if="referenciaTipoCambio" class="text-primary q-mb-sm">
-        Ref: 1 {{ monedaOrigen?.monedaCodigo }} =
-        {{ referenciaTipoCambio }}
-        {{ monedaDestino?.monedaCodigo }}
-      </div>
+            <q-item-section>
+              <q-item-label> {{ scope.opt.codigo }} - {{ scope.opt.nombre }} </q-item-label>
+              <q-item-label caption>
+                Saldo actual:
+                <span class="text-grey-8 text-weight-bold">
+                  {{ scope.opt.simbolo }} {{ scope.opt.saldo.toFixed(2) }}
+                </span>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
+
+        <template #selected-item="scope">
+          <div class="row items-center q-gutter-sm">
+            <q-avatar size="24px">
+              <img :src="scope.opt.bandera" />
+            </q-avatar>
+            <span>{{ scope.opt.codigo }} - {{ scope.opt.nombre }}</span>
+          </div>
+        </template>
+      </q-select>
+
+      <q-banner v-if="referenciaMensaje" class="bg-yellow-1 text-grey-9 q-mb-md rounded-borders">
+        Referencia actual: {{ referenciaMensaje }}
+      </q-banner>
 
       <q-input
         outlined
@@ -107,7 +167,7 @@ const billeteras = ref([])
 const loading = ref(false)
 const message = ref('')
 const errorMessage = ref('')
-const referenciaTipoCambio = ref(null)
+const referenciaMensaje = ref('')
 
 const usuarioId = localStorage.getItem('userId')
 
@@ -119,9 +179,14 @@ const form = ref({
 })
 
 const monedasOptions = computed(() =>
-  monedas.value.map((m) => ({
-    id: m.id,
-    label: `${m.codigoIso} - ${m.nombre}`,
+  billeteras.value.map((b) => ({
+    id: b.monedaId,
+    codigo: b.monedaCodigo,
+    nombre: b.monedaNombre,
+    simbolo: b.monedaSimbolo,
+    bandera: b.monedaBandera,
+    saldo: Number(b.saldoDisponible),
+    label: `${b.monedaCodigo} - ${b.monedaNombre}`,
   })),
 )
 
@@ -133,7 +198,7 @@ const monedaDestino = computed(() =>
   billeteras.value.find((b) => b.monedaId === form.value.monedaDestinoId),
 )
 
-const saldoDisponibleOrigen = computed(() => monedaOrigen.value?.saldoDisponible || 0)
+const saldoDisponibleOrigen = computed(() => Number(monedaOrigen.value?.saldoDisponible || 0))
 
 const montoARecibir = computed(() => {
   const monto = Number(form.value.montoOrigen) || 0
@@ -141,14 +206,18 @@ const montoARecibir = computed(() => {
   return monto * tasa
 })
 
+const montoSuperaSaldo = computed(() => {
+  return Number(form.value.montoOrigen) > saldoDisponibleOrigen.value
+})
+
 const formularioValido = computed(() => {
   return (
     form.value.monedaOrigenId &&
     form.value.monedaDestinoId &&
     form.value.monedaOrigenId !== form.value.monedaDestinoId &&
-    form.value.montoOrigen > 0 &&
-    form.value.tasaCambio > 0 &&
-    form.value.montoOrigen <= saldoDisponibleOrigen.value
+    Number(form.value.montoOrigen) > 0 &&
+    Number(form.value.tasaCambio) > 0 &&
+    !montoSuperaSaldo.value
   )
 })
 
@@ -157,21 +226,12 @@ const cargarDatos = async () => {
   billeteras.value = await obtenerSaldosPorUsuario(usuarioId)
 }
 
-const extraerTasa = (data) => {
-  return (
-    data?.tasaCambio ||
-    data?.tipoCambio ||
-    data?.rate ||
-    data?.conversion_rate ||
-    data?.resultado ||
-    null
-  )
-}
-
 const alCambiarMonedas = async () => {
-  referenciaTipoCambio.value = null
+  referenciaMensaje.value = ''
 
   if (!monedaOrigen.value || !monedaDestino.value) return
+
+  if (form.value.monedaOrigenId === form.value.monedaDestinoId) return
 
   try {
     const response = await obtenerTipoCambioEnVivo(
@@ -179,14 +239,12 @@ const alCambiarMonedas = async () => {
       monedaDestino.value.monedaCodigo,
     )
 
-    const tasa = extraerTasa(response)
+    if (response?.mensaje) {
+      referenciaMensaje.value = response.mensaje
+    }
 
-    if (tasa) {
-      referenciaTipoCambio.value = Number(tasa).toFixed(4)
-
-      if (!form.value.tasaCambio) {
-        form.value.tasaCambio = Number(tasa)
-      }
+    if (response?.tasaCambioReferencial && !form.value.tasaCambio) {
+      form.value.tasaCambio = Number(response.tasaCambioReferencial)
     }
   } catch (error) {
     console.error(error)
@@ -222,7 +280,7 @@ const guardarOferta = async () => {
       tasaCambio: null,
     }
 
-    referenciaTipoCambio.value = null
+    referenciaMensaje.value = ''
     await cargarDatos()
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'No se pudo publicar la oferta.'
