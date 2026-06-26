@@ -2,9 +2,7 @@
   <q-page class="q-pa-lg">
     <div class="text-h4 text-primary q-mb-sm">Crear oferta</div>
 
-    <div class="text-grey-7 q-mb-lg">
-      Publica una oferta de compra o venta de divisas en el mercado P2P.
-    </div>
+    <div class="text-grey-7 q-mb-lg">Crea una oferta directa entre billeteras del sistema.</div>
 
     <q-card class="q-pa-lg oferta-form">
       <q-select
@@ -16,6 +14,24 @@
         emit-value
         map-options
         label="Moneda que ofreces"
+        class="q-mb-sm"
+        @update:model-value="alCambiarMonedas"
+      />
+
+      <div v-if="monedaOrigen" class="text-grey-7 q-mb-md">
+        Saldo disponible:
+        <strong>
+          {{ monedaOrigen.monedaSimbolo }}
+          {{ saldoDisponibleOrigen.toFixed(2) }}
+          {{ monedaOrigen.monedaCodigo }}
+        </strong>
+      </div>
+
+      <q-input
+        outlined
+        v-model.number="form.montoOrigen"
+        label="Monto a ofrecer"
+        type="number"
         class="q-mb-md"
       />
 
@@ -29,15 +45,14 @@
         map-options
         label="Moneda que deseas recibir"
         class="q-mb-md"
+        @update:model-value="alCambiarMonedas"
       />
 
-      <q-input
-        outlined
-        v-model.number="form.montoOrigen"
-        label="Monto a ofrecer"
-        type="number"
-        class="q-mb-md"
-      />
+      <div v-if="referenciaTipoCambio" class="text-primary q-mb-sm">
+        Ref: 1 {{ monedaOrigen?.monedaCodigo }} =
+        {{ referenciaTipoCambio }}
+        {{ monedaDestino?.monedaCodigo }}
+      </div>
 
       <q-input
         outlined
@@ -47,11 +62,25 @@
         class="q-mb-md"
       />
 
+      <q-banner class="bg-grey-2 text-grey-8 q-mb-md rounded-borders">
+        Monto a recibir:
+        <strong>
+          {{ monedaDestino?.monedaSimbolo || '' }}
+          {{ montoARecibir.toFixed(2) }}
+          {{ monedaDestino?.monedaCodigo || '' }}
+        </strong>
+      </q-banner>
+
+      <q-banner class="bg-blue-1 text-primary q-mb-md rounded-borders">
+        Al publicar la oferta, el monto ofrecido será bloqueado temporalmente en tu billetera.
+      </q-banner>
+
       <q-btn
         color="primary"
         label="Publicar oferta"
         class="full-width"
         :loading="loading"
+        :disable="!formularioValido"
         @click="guardarOferta"
       />
     </q-card>
@@ -70,11 +99,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { crearOferta } from 'src/services/ofertas.service'
 import { obtenerMonedasActivas } from 'src/services/monedas.service'
+import { obtenerSaldosPorUsuario } from 'src/services/billeteras.service'
+import { obtenerTipoCambioEnVivo } from 'src/services/tipoCambio.service'
 
 const monedas = ref([])
+const billeteras = ref([])
 const loading = ref(false)
 const message = ref('')
 const errorMessage = ref('')
+const referenciaTipoCambio = ref(null)
 
 const usuarioId = localStorage.getItem('userId')
 
@@ -92,31 +125,80 @@ const monedasOptions = computed(() =>
   })),
 )
 
-const cargarMonedas = async () => {
+const monedaOrigen = computed(() =>
+  billeteras.value.find((b) => b.monedaId === form.value.monedaOrigenId),
+)
+
+const monedaDestino = computed(() =>
+  billeteras.value.find((b) => b.monedaId === form.value.monedaDestinoId),
+)
+
+const saldoDisponibleOrigen = computed(() => monedaOrigen.value?.saldoDisponible || 0)
+
+const montoARecibir = computed(() => {
+  const monto = Number(form.value.montoOrigen) || 0
+  const tasa = Number(form.value.tasaCambio) || 0
+  return monto * tasa
+})
+
+const formularioValido = computed(() => {
+  return (
+    form.value.monedaOrigenId &&
+    form.value.monedaDestinoId &&
+    form.value.monedaOrigenId !== form.value.monedaDestinoId &&
+    form.value.montoOrigen > 0 &&
+    form.value.tasaCambio > 0 &&
+    form.value.montoOrigen <= saldoDisponibleOrigen.value
+  )
+})
+
+const cargarDatos = async () => {
   monedas.value = await obtenerMonedasActivas()
+  billeteras.value = await obtenerSaldosPorUsuario(usuarioId)
+}
+
+const extraerTasa = (data) => {
+  return (
+    data?.tasaCambio ||
+    data?.tipoCambio ||
+    data?.rate ||
+    data?.conversion_rate ||
+    data?.resultado ||
+    null
+  )
+}
+
+const alCambiarMonedas = async () => {
+  referenciaTipoCambio.value = null
+
+  if (!monedaOrigen.value || !monedaDestino.value) return
+
+  try {
+    const response = await obtenerTipoCambioEnVivo(
+      monedaOrigen.value.monedaCodigo,
+      monedaDestino.value.monedaCodigo,
+    )
+
+    const tasa = extraerTasa(response)
+
+    if (tasa) {
+      referenciaTipoCambio.value = Number(tasa).toFixed(4)
+
+      if (!form.value.tasaCambio) {
+        form.value.tasaCambio = Number(tasa)
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 const guardarOferta = async () => {
   message.value = ''
   errorMessage.value = ''
 
-  if (!form.value.monedaOrigenId || !form.value.monedaDestinoId) {
-    errorMessage.value = 'Selecciona las monedas de la oferta.'
-    return
-  }
-
-  if (form.value.monedaOrigenId === form.value.monedaDestinoId) {
-    errorMessage.value = 'La moneda de origen y destino no pueden ser iguales.'
-    return
-  }
-
-  if (!form.value.montoOrigen || form.value.montoOrigen <= 0) {
-    errorMessage.value = 'El monto debe ser mayor a cero.'
-    return
-  }
-
-  if (!form.value.tasaCambio || form.value.tasaCambio <= 0) {
-    errorMessage.value = 'El tipo de cambio debe ser mayor a cero.'
+  if (!formularioValido.value) {
+    errorMessage.value = 'Completa correctamente los datos de la oferta.'
     return
   }
 
@@ -139,22 +221,24 @@ const guardarOferta = async () => {
       montoOrigen: null,
       tasaCambio: null,
     }
+
+    referenciaTipoCambio.value = null
+    await cargarDatos()
   } catch (error) {
-    errorMessage.value =
-      error.response?.data?.message || 'No se pudo publicar la oferta.'
+    errorMessage.value = error.response?.data?.message || 'No se pudo publicar la oferta.'
   } finally {
     loading.value = false
   }
 }
 
 onMounted(() => {
-  cargarMonedas()
+  cargarDatos()
 })
 </script>
 
 <style scoped>
 .oferta-form {
-  max-width: 520px;
+  max-width: 560px;
   border-radius: 16px;
 }
 </style>
