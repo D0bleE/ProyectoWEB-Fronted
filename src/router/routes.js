@@ -65,7 +65,7 @@ const routes = [
 
       {
         path: 'historial',
-        component: () => import('pages/historial/HistorialMovimientosPage.vue'),
+        component: () => import('pages/historial/HistorialPage.vue'),
         meta: { requiresAuth: true },
       },
     ],
