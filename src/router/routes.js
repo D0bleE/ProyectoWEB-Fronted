@@ -62,6 +62,12 @@ const routes = [
         component: () => import('pages/admin/AdminMovimientosPage.vue'),
         meta: { requiresAuth: true, requiresAdmin: true },
       },
+
+      {
+        path: 'historial',
+        component: () => import('pages/historial/HistorialMovimientosPage.vue'),
+        meta: { requiresAuth: true },
+      },
     ],
   },
 
