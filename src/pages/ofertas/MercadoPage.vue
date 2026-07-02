@@ -39,7 +39,6 @@
             color="primary"
             label="Tomar oferta"
             class="full-width q-mt-md"
-            :disable="oferta.creadorId === usuarioId"
             :loading="processingId === oferta.id"
             @click="tomarOferta(oferta)"
           />
@@ -78,7 +77,8 @@ const errorMessage = ref('')
 const cargarOfertas = async () => {
   try {
     loading.value = true
-    ofertas.value = await obtenerMercado()
+    const data = await obtenerMercado()
+    ofertas.value = data.filter((oferta) => oferta.creadorId !== usuarioId)
   } catch (error) {
     console.error(error)
     errorMessage.value = 'No se pudieron cargar las ofertas.'
