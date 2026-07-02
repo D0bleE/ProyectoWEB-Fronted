@@ -26,3 +26,8 @@ export const aceptarOferta = async (id, data) => {
   const response = await api.post(`/Ofertas/aceptar/${id}`, data)
   return response.data
 }
+
+export const obtenerHistorialP2P = async (usuarioId) => {
+  const response = await api.get(`/Ofertas/historial/${usuarioId}`)
+  return response.data
+}

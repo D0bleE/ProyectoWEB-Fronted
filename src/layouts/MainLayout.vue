@@ -58,6 +58,14 @@
           <q-item-section>Mis Ofertas</q-item-section>
         </q-item>
 
+        <q-item clickable to="/historial">
+          <q-item-section avatar>
+            <q-icon name="history" />
+          </q-item-section>
+
+          <q-item-section> Historial </q-item-section>
+        </q-item>
+
         <q-item v-if="userRole === 'ADM'" clickable v-ripple to="/admin">
           <q-item-section avatar>
             <q-icon name="admin_panel_settings" />
@@ -90,7 +98,7 @@ const router = useRouter()
 const leftDrawerOpen = ref(false)
 
 const userName = localStorage.getItem('userName') || 'Usuario'
-const userRole = localStorage.getItem('userRole') || 'USR'
+const userRole = localStorage.getItem('userRole') || 'USU'
 
 const logout = () => {
   localStorage.clear()
