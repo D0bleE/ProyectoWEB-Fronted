@@ -6,72 +6,93 @@
 
         <q-toolbar-title>P2P Divisas</q-toolbar-title>
 
-        <div class="q-mr-md">
-          {{ userName }}
-        </div>
+        <q-chip
+          v-if="esAdmin"
+          color="deep-purple"
+          text-color="white"
+          dense
+          class="q-mr-sm"
+        >
+          ADMIN
+        </q-chip>
+
+        <div class="q-mr-md">{{ userName }}</div>
       </q-toolbar>
     </q-header>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list padding>
-        <q-item-label header>Menú principal</q-item-label>
+        <q-item-label header>
+          {{ esAdmin ? 'Menú administrador' : 'Menú principal' }}
+        </q-item-label>
 
-        <q-item clickable v-ripple to="/dashboard">
-          <q-item-section avatar>
-            <q-icon name="dashboard" />
+        <!-- USUARIO -->
+        <template v-if="!esAdmin">
+          <q-item clickable v-ripple to="/dashboard">
+            <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/billeteras">
+            <q-item-section avatar><q-icon name="account_balance_wallet" /></q-item-section>
+            <q-item-section>Billeteras</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/cuentas-bancarias">
+            <q-item-section avatar><q-icon name="account_balance" /></q-item-section>
+            <q-item-section>Cuentas Bancarias</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/mercado">
+            <q-item-section avatar><q-icon name="currency_exchange" /></q-item-section>
+            <q-item-section>Mercado P2P</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/ofertas/crear">
+            <q-item-section avatar><q-icon name="add_business" /></q-item-section>
+            <q-item-section>Crear Oferta</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/mis-ofertas">
+            <q-item-section avatar><q-icon name="list_alt" /></q-item-section>
+            <q-item-section>Mis Ofertas</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/historial">
+            <q-item-section avatar><q-icon name="history" /></q-item-section>
+            <q-item-section>Historial</q-item-section>
+          </q-item>
+        </template>
+
+        <!-- ADMIN -->
+        <template v-else>
+          <q-item clickable v-ripple to="/admin">
+            <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
+            <q-item-section>Dashboard Admin</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/admin/movimientos">
+            <q-item-section avatar><q-icon name="fact_check" /></q-item-section>
+            <q-item-section>Movimientos</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple :to="{ path: '/admin/usuarios' }">
+            <q-item-section avatar>
+             <q-icon name="groups" />
           </q-item-section>
-          <q-item-section>Dashboard</q-item-section>
-        </q-item>
+          <q-item-section>Usuarios</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/billeteras">
-          <q-item-section avatar>
-            <q-icon name="account_balance_wallet" />
-          </q-item-section>
-          <q-item-section>Billeteras</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/admin/monedas">
+            <q-item-section avatar><q-icon name="paid" /></q-item-section>
+            <q-item-section>Monedas</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/cuentas-bancarias">
-          <q-item-section avatar>
-            <q-icon name="account_balance" />
-          </q-item-section>
-          <q-item-section> Cuentas Bancarias </q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/mercado">
-          <q-item-section avatar>
-            <q-icon name="currency_exchange" />
-          </q-item-section>
-          <q-item-section>Mercado P2P</q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/ofertas/crear">
-          <q-item-section avatar>
-            <q-icon name="add_business" />
-          </q-item-section>
-          <q-item-section>Crear Oferta</q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/mis-ofertas">
-          <q-item-section avatar>
-            <q-icon name="list_alt" />
-          </q-item-section>
-          <q-item-section>Mis Ofertas</q-item-section>
-        </q-item>
-
-        <q-item clickable to="/historial">
-          <q-item-section avatar>
-            <q-icon name="history" />
-          </q-item-section>
-
-          <q-item-section> Historial </q-item-section>
-        </q-item>
-
-        <q-item v-if="userRole === 'ADM'" clickable v-ripple to="/admin">
-          <q-item-section avatar>
-            <q-icon name="admin_panel_settings" />
-          </q-item-section>
-          <q-item-section>Admin Movimientos</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/admin/historial">
+            <q-item-section avatar><q-icon name="manage_search" /></q-item-section>
+            <q-item-section>Historial Admin</q-item-section>
+          </q-item>
+        </template>
 
         <q-separator class="q-my-md" />
 
@@ -91,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -99,6 +120,8 @@ const leftDrawerOpen = ref(false)
 
 const userName = localStorage.getItem('userName') || 'Usuario'
 const userRole = localStorage.getItem('userRole') || 'USU'
+
+const esAdmin = computed(() => userRole === 'ADM')
 
 const logout = () => {
   localStorage.clear()
