@@ -1,1 +1,146 @@
 // app global css
+
+// Estilos globales para tema oscuro Binance
+body,
+html,
+#q-app {
+  background-color: #0b0e11;
+  color: #eaecef;
+}
+
+.q-page {
+  background-color: #0b0e11;
+  color: #eaecef;
+}
+
+.q-card {
+  background-color: #1e2329;
+  color: #eaecef;
+  border: 1px solid #404656;
+}
+
+.q-dialog__inner {
+  background-color: #1e2329;
+  color: #eaecef;
+}
+
+.q-drawer {
+  background-color: #1e2329;
+  color: #eaecef;
+  border-right: 1px solid #404656;
+}
+
+.q-item {
+  color: #eaecef;
+}
+
+.q-item__label {
+  color: #848e9c;
+}
+
+.q-field {
+  color: #eaecef;
+}
+
+.q-field__control {
+  color: #eaecef;
+}
+
+.q-field__native,
+.q-field__input {
+  color: #eaecef;
+}
+
+.q-input__control {
+  color: #eaecef;
+}
+
+// Inputs y selects con borde gris
+.q-field--outlined .q-field__control:before {
+  border-color: #404656;
+}
+
+.q-field--outlined:hover .q-field__control:before {
+  border-color: #fcd535;
+}
+
+.q-field--outlined.q-field--focused .q-field__control:before {
+  border-color: #fcd535;
+}
+
+// Labels de inputs
+.q-field__label {
+  color: #848e9c;
+}
+
+.q-field--focused .q-field__label {
+  color: #eaecef;
+}
+
+.q-separator {
+  background-color: #404656;
+}
+
+.text-grey-7 {
+  color: #848e9c;
+}
+
+.text-grey-8 {
+  color: #eaecef;
+}
+
+// Tablas oscuras
+.q-table {
+  background-color: #1e2329;
+  color: #eaecef;
+}
+
+.q-table__card {
+  background-color: #1e2329;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 1px solid #404656;
+}
+
+.q-table thead tr,
+.q-table tbody td {
+  border-color: #404656;
+}
+
+.q-table tbody tr:hover {
+  background-color: rgba(252, 213, 53, 0.05);
+}
+
+.q-table thead tr {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+// Estilos para banners oscuros con bordes grises y letras blancas
+.bg-negative-dark {
+  background-color: rgba(246, 70, 93, 0.15);
+  border: 1px solid #404656;
+  color: #eaecef;
+}
+
+.bg-positive-dark {
+  background-color: rgba(14, 203, 129, 0.15);
+  border: 1px solid #404656;
+  color: #eaecef;
+}
+
+.bg-warning-dark {
+  background-color: rgba(242, 153, 78, 0.15);
+  border: 1px solid #404656;
+  color: #eaecef;
+}
+
+.bg-info-dark {
+  background-color: rgba(49, 204, 236, 0.15);
+  border: 1px solid #404656;
+  color: #eaecef;
+}
+
+.bg-primary-dark {
+  background-color: rgba(252, 213, 53, 0.15);
+  border: 1px solid #404656;
+  color: #eaecef;
+}

@@ -16,30 +16,30 @@
 
     <div class="row q-col-gutter-md q-mt-lg">
       <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
+        <q-card flat bordered class="dashboard-card">
           <q-card-section>
-            <div class="text-subtitle2">Soles a Dólares</div>
-            <div class="text-h6 q-mt-sm">Tipo de cambio</div>
+            <div class="text-subtitle2 text-secondary">Soles a Dólares</div>
+            <div class="text-h6 q-mt-sm text-secondary">Tipo de cambio</div>
             <div class="text-h4 text-primary q-mt-xs">{{ formatoTipoCambio(rates.usd) }}</div>
           </q-card-section>
         </q-card>
       </div>
 
       <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
+        <q-card flat bordered class="dashboard-card">
           <q-card-section>
-            <div class="text-subtitle2">Soles a Euros</div>
-            <div class="text-h6 q-mt-sm">Tipo de cambio</div>
+            <div class="text-subtitle2 text-secondary">Soles a Euros</div>
+            <div class="text-h6 q-mt-sm text-secondary">Tipo de cambio</div>
             <div class="text-h4 text-primary q-mt-xs">{{ formatoTipoCambio(rates.eur) }}</div>
           </q-card-section>
         </q-card>
       </div>
 
       <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
+        <q-card flat bordered class="dashboard-card">
           <q-card-section>
-            <div class="text-subtitle2">Soles a Yuanes</div>
-            <div class="text-h6 q-mt-sm">Tipo de cambio</div>
+            <div class="text-subtitle2 text-secondary">Soles a Yuanes</div>
+            <div class="text-h6 q-mt-sm text-secondary">Tipo de cambio</div>
             <div class="text-h4 text-primary q-mt-xs">{{ formatoTipoCambio(rates.cny) }}</div>
           </q-card-section>
         </q-card>
@@ -47,10 +47,10 @@
     </div>
 
     <div class="q-mt-xl">
-      <q-card flat bordered class="bg-white">
+      <q-card flat bordered class="dashboard-card">
         <q-card-section class="row items-center justify-between">
           <div>
-            <div class="text-subtitle2">Movimiento del tipo de cambio PEN → USD</div>
+            <div class="text-subtitle2 text-secondary">Movimiento del tipo de cambio PEN → USD</div>
             <div class="text-grey-7">Últimos {{ chartData.length }} días</div>
           </div>
           <div v-if="chartLoading">
@@ -58,7 +58,7 @@
           </div>
         </q-card-section>
 
-        <q-separator />
+        <q-separator style="background-color: rgba(252, 213, 53, 0.1)" />
 
         <q-card-section>
           <div class="q-mb-md chart-container">
@@ -89,13 +89,13 @@
           </div>
           <div class="row q-col-gutter-lg q-mt-md">
             <div class="col-12 col-md-4">
-              <label class="text-subtitle2 text-grey-8">Moneda origen</label>
+              <label class="text-subtitle2 text-secondary">Moneda origen</label>
               <q-input
                 v-model.number="simulatorData.pen"
                 type="number"
                 outlined
                 dense
-                class="q-mt-xs bg-grey-1"
+                class="q-mt-xs input-dark"
                 placeholder="0.00"
                 @update:model-value="calculateSimulator"
               >
@@ -106,24 +106,45 @@
             </div>
 
             <div class="col-12 col-md-8">
-              <label class="text-subtitle2 text-grey-8">Moneda destino</label>
+              <label class="text-subtitle2 text-secondary">Moneda destino</label>
               <div class="row q-col-gutter-md q-mt-none">
                 <div class="col-12 col-md-4">
-                  <q-input :model-value="simulatorData.usd" type="number" outlined dense readonly>
+                  <q-input
+                    :model-value="simulatorData.usd"
+                    type="number"
+                    outlined
+                    dense
+                    readonly
+                    class="input-dark"
+                  >
                     <template v-slot:append>
                       <span class="text-primary text-subtitle2 text-weight-bold">USD</span>
                     </template>
                   </q-input>
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input :model-value="simulatorData.eur" type="number" outlined dense readonly>
+                  <q-input
+                    :model-value="simulatorData.eur"
+                    type="number"
+                    outlined
+                    dense
+                    readonly
+                    class="input-dark"
+                  >
                     <template v-slot:append>
                       <span class="text-primary text-subtitle2 text-weight-bold">EUR</span>
                     </template>
                   </q-input>
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input :model-value="simulatorData.cny" type="number" outlined dense readonly>
+                  <q-input
+                    :model-value="simulatorData.cny"
+                    type="number"
+                    outlined
+                    dense
+                    readonly
+                    class="input-dark"
+                  >
                     <template v-slot:append>
                       <span class="text-primary text-subtitle2 text-weight-bold">CNY</span>
                     </template>
@@ -395,6 +416,23 @@ onMounted(loadExchangeData)
 </script>
 
 <style scoped>
+.dashboard-card {
+  background-color: #1e2329;
+  border-color: rgba(252, 213, 53, 0.1);
+}
+
+.input-dark {
+  background-color: rgba(30, 35, 41, 0.8);
+}
+
+.input-dark :deep(.q-field__control) {
+  color: #eaecef;
+}
+
+.text-secondary {
+  color: #848e9c;
+}
+
 .chart-canvas {
   width: 100%;
   max-width: 100%;

@@ -58,7 +58,7 @@
 
     <q-banner
       v-if="!loading && movimientos.length === 0"
-      class="bg-grey-2 text-grey-8 q-mt-md rounded-borders"
+      class="bg-info-dark text-info q-mt-md rounded-borders"
     >
       No hay solicitudes pendientes.
     </q-banner>
