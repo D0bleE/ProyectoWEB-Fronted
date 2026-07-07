@@ -19,6 +19,10 @@ export const procesarSolicitud = async (id, accion) => {
   const response = await api.post(`/MovimientosFondos/procesar-solicitud/${id}?accion=${accion}`)
   return response.data
 }
+export const obtenerHistorialMovimientosAdmin = async () => {
+  const response = await api.get('/MovimientosFondos/admin/historial')
+  return response.data
+}
 
 export const obtenerMovimientosPorUsuario = async (usuarioId) => {
   const response = await api.get(`/MovimientosFondos/usuario/${usuarioId}`)
