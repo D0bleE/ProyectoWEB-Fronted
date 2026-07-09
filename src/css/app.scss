@@ -81,7 +81,7 @@ body {
 .bg-white .q-card {
   background-color: #0f1620 !important;
   color: #e5e8ee !important;
-  border-color: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 .bg-white .q-table__top,
@@ -99,7 +99,7 @@ body {
 .bg-white .q-td {
   background-color: transparent !important;
   color: #e5e8ee !important;
-  border-color: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255, 255, 255, 0.04) !important;
 }
 
 .bg-white thead th,
@@ -111,17 +111,17 @@ body {
 
 .bg-white tbody tr:hover,
 .bg-white .q-tr:hover {
-  background-color: rgba(240,185,11,0.04) !important;
+  background-color: rgba(240, 185, 11, 0.04) !important;
 }
 
 /* Acciones: botones dentro de tablas (aprobar/rechazar) */
-.bg-white .q-btn[outline][color="primary"],
+.bg-white .q-btn[outline][color='primary'],
 .bg-white .q-btn.color-primary {
   background-color: transparent !important;
   color: #12b886 !important;
 }
 
-.bg-white .q-btn[color="negative"],
+.bg-white .q-btn[color='negative'],
 .bg-white .q-btn.color-negative {
   color: #ea5455 !important;
 }
@@ -154,7 +154,7 @@ body {
 .admin-movimientos-page .q-td {
   background-color: transparent !important;
   color: #e5e8ee !important;
-  border-color: rgba(255,255,255,0.04) !important;
+  border-color: rgba(255, 255, 255, 0.04) !important;
 }
 
 .admin-movimientos-page .q-table__title {
@@ -169,16 +169,16 @@ body {
 }
 
 .admin-movimientos-page .q-table__container {
-  background-color: rgba(15,22,32,0.6) !important;
+  background-color: rgba(15, 22, 32, 0.6) !important;
   padding: 0 !important;
 }
 
 .admin-movimientos-page .q-table--flat .q-tr:nth-child(even) {
-  background-color: rgba(255,255,255,0.01) !important;
+  background-color: rgba(255, 255, 255, 0.01) !important;
 }
 
-.admin-movimientos-page .q-btn[label="Ver voucher"],
-.admin-movimientos-page .q-btn[icon="image"] {
+.admin-movimientos-page .q-btn[label='Ver voucher'],
+.admin-movimientos-page .q-btn[icon='image'] {
   color: #f0b90b !important;
 }
 
