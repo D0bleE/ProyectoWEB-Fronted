@@ -1,15 +1,15 @@
 <template>
-  <q-page class="q-pa-lg">
-    <div class="text-h4 text-primary q-mb-sm">Historial</div>
+  <q-page class="historial-page q-pa-lg">
+    <div class="text-h4 text-yellow q-mb-sm">Historial</div>
 
     <div class="text-grey-7 q-mb-lg">Consulta tus movimientos de fondos y operaciones P2P.</div>
 
     <q-tabs
       v-model="tab"
       dense
-      class="text-primary q-mb-md"
-      active-color="primary"
-      indicator-color="primary"
+      class="historial-tabs q-mb-md"
+      active-color="yellow"
+      indicator-color="yellow"
       align="left"
     >
       <q-tab name="movimientos" icon="account_balance_wallet" label="Movimientos" />
@@ -26,6 +26,7 @@
           v-else
           flat
           bordered
+          class="historial-table"
           :rows="movimientos"
           :columns="columnsMovimientos"
           row-key="id"
@@ -79,6 +80,7 @@
           v-else
           flat
           bordered
+          class="historial-table"
           :rows="operacionesP2P"
           :columns="columnsP2P"
           row-key="id"
@@ -125,7 +127,7 @@
     </q-tab-panels>
 
     <q-dialog v-model="dialogVoucher">
-      <q-card style="width: 650px; max-width: 95vw">
+      <q-card class="historial-dialog-card" style="width: 650px; max-width: 95vw">
         <q-card-section class="row items-center">
           <div class="text-h6">Voucher</div>
           <q-space />
@@ -133,7 +135,7 @@
         </q-card-section>
 
         <q-card-section>
-          <img :src="voucherSeleccionado" style="width: 100%; border-radius: 12px" />
+          <img :src="voucherSeleccionado" class="voucher-image" />
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -230,3 +232,79 @@ onMounted(() => {
   cargarHistorialP2P()
 })
 </script>
+
+<style scoped>
+.historial-page {
+  background-color: #090c16;
+}
+
+.historial-tabs .q-tab {
+  color: #e5e8ee !important;
+}
+
+.historial-tabs .q-tab.q-tab--active {
+  color: #f0b90b !important;
+}
+
+.historial-table,
+.historial-table .q-table__top,
+.historial-table .q-table__middle,
+.historial-table .q-table__bottom,
+.historial-table .q-table__grid,
+.historial-table table,
+.historial-table thead,
+.historial-table tbody,
+.historial-table tr,
+.historial-table th,
+.historial-table td,
+.historial-table .q-th,
+.historial-table .q-td,
+.historial-table .q-table__middle .q-scrollarea__content,
+.historial-table .q-table__middle .q-scrollarea__container,
+.historial-table .q-table__bottom .q-btn,
+.historial-table .q-table__top .q-btn {
+  background-color: #0f1620 !important;
+  color: #e5e8ee !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.historial-table thead th,
+.historial-table .q-th {
+  background-color: #101820 !important;
+  color: #f0b90b !important;
+}
+
+.historial-table tbody tr:hover,
+.historial-table .q-tr:hover {
+  background-color: rgba(240, 185, 11, 0.08) !important;
+}
+
+.historial-table .q-table__empty,
+.historial-table tbody tr.q-table__empty-row {
+  background-color: #0f1620 !important;
+}
+
+.historial-table .q-td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.historial-table .q-tr:hover {
+  background-color: rgba(240, 185, 11, 0.08) !important;
+}
+
+.historial-table .q-badge,
+.historial-table .q-chip {
+  font-weight: 600;
+}
+
+.historial-dialog-card {
+  background-color: #121826;
+  color: #e5e8ee;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.voucher-image {
+  width: 100%;
+  border-radius: 12px;
+}
+</style>

@@ -1,18 +1,12 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <q-header elevated class="bg-secondary text-yellow">
       <q-toolbar>
         <q-btn flat dense round icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
 
         <q-toolbar-title>P2P Divisas</q-toolbar-title>
 
-        <q-chip
-          v-if="esAdmin"
-          color="deep-purple"
-          text-color="white"
-          dense
-          class="q-mr-sm"
-        >
+        <q-chip v-if="esAdmin" color="yellow" text-color="dark" dense class="q-mr-sm">
           ADMIN
         </q-chip>
 
@@ -20,26 +14,33 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list padding>
-        <q-item-label header>
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      class="app-drawer bg-secondary text-yellow"
+    >
+      <q-list padding class="app-drawer-list">
+        <q-item-label header class="text-grey-7">
           {{ esAdmin ? 'Menú administrador' : 'Menú principal' }}
         </q-item-label>
 
         <!-- USUARIO -->
         <template v-if="!esAdmin">
-          <q-item clickable v-ripple to="/dashboard">
-            <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
+          <q-item clickable v-ripple to="/dashboard" class="app-drawer-item">
+            <q-item-section avatar><q-icon name="dashboard" color="yellow" /></q-item-section>
             <q-item-section>Dashboard</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/billeteras">
-            <q-item-section avatar><q-icon name="account_balance_wallet" /></q-item-section>
+          <q-item clickable v-ripple to="/billeteras" class="app-drawer-item">
+            <q-item-section avatar
+              ><q-icon name="account_balance_wallet" color="yellow"
+            /></q-item-section>
             <q-item-section>Billeteras</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/cuentas-bancarias">
-            <q-item-section avatar><q-icon name="account_balance" /></q-item-section>
+          <q-item clickable v-ripple to="/cuentas-bancarias" class="app-drawer-item">
+            <q-item-section avatar><q-icon name="account_balance" color="yellow" /></q-item-section>
             <q-item-section>Cuentas Bancarias</q-item-section>
           </q-item>
 
@@ -78,9 +79,9 @@
 
           <q-item clickable v-ripple :to="{ path: '/admin/usuarios' }">
             <q-item-section avatar>
-             <q-icon name="groups" />
-          </q-item-section>
-          <q-item-section>Usuarios</q-item-section>
+              <q-icon name="groups" />
+            </q-item-section>
+            <q-item-section>Usuarios</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple to="/admin/monedas">
@@ -128,3 +129,81 @@ const logout = () => {
   router.push('/login')
 }
 </script>
+
+<style scoped>
+.app-drawer,
+.app-drawer .q-drawer__content,
+.app-drawer .q-drawer__inner,
+.app-drawer .q-drawer__content .q-scrollarea__container,
+.app-drawer .q-drawer__content .q-scrollarea__content {
+  background-color: #071118 !important;
+  color: #e5e8ee !important;
+  border-color: rgba(240, 185, 11, 0.14) !important;
+}
+
+.app-drawer.q-drawer--bordered,
+.app-drawer .q-drawer__content {
+  border-right: 1px solid rgba(240, 185, 11, 0.14) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.app-drawer-list {
+  min-height: 100%;
+  padding-top: 12px;
+}
+
+.app-drawer .q-item {
+  border-radius: 12px;
+  margin-bottom: 6px;
+  background-color: transparent;
+  color: #e5e8ee;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.app-drawer .q-item:hover {
+  background-color: rgba(240, 185, 11, 0.12);
+  transform: translateX(2px);
+}
+
+.app-drawer .q-item.q-item--active,
+.app-drawer .q-item.q-item--active:hover,
+.app-drawer .q-item.active {
+  background-color: rgba(240, 185, 11, 0.18);
+}
+
+.app-drawer .q-item .q-item-section,
+.app-drawer .q-item--active .q-item__section,
+.app-drawer .q-item__label,
+.app-drawer .q-item-label {
+  color: #e5e8ee;
+}
+
+.app-drawer .q-item .q-item__section,
+.app-drawer .q-item .q-item__label,
+.app-drawer .q-item .q-item__section span,
+.app-drawer .q-item .q-item__section div {
+  color: inherit;
+}
+
+.app-drawer .q-icon,
+.app-drawer .q-item .q-item-section .q-icon,
+.app-drawer .q-item .q-item__section .q-icon {
+  color: #f0b90b !important;
+}
+
+.app-drawer .q-item-label {
+  color: #9aa4b5;
+  margin-bottom: 16px;
+}
+
+.app-drawer .q-separator {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-drawer .text-negative {
+  color: #ea5455 !important;
+}
+</style>
