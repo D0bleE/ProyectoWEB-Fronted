@@ -1,95 +1,99 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="header-bar">
+    <q-header elevated class="bg-secondary text-yellow">
       <q-toolbar>
-        <q-btn
-          v-if="!isAdminPage"
-          flat
-          dense
-          round
-          icon="menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
+        <q-btn flat dense round icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" />
 
-        <q-toolbar-title class="logo-title">P2P Divisas</q-toolbar-title>
+        <q-toolbar-title>P2P Divisas</q-toolbar-title>
 
-        <div class="user-section q-mr-md">
-          <div class="user-info q-mr-md">
-            <div class="user-name text-weight-bold">{{ userName }}</div>
-            <div class="user-role text-caption">
-              {{ userRole === 'ADM' ? 'Administrador' : 'Usuario' }}
-            </div>
-          </div>
-          <q-avatar
-            :icon="userAvatar.icon"
-            :color="userAvatar.color"
-            text-color="white"
-            size="40px"
-          />
-        </div>
+        <q-chip v-if="esAdmin" color="yellow" text-color="dark" dense class="q-mr-sm">
+          ADMIN
+        </q-chip>
+
+        <div class="q-mr-md">{{ userName }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-if="!isAdminPage" v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list padding>
-        <q-item-label header>Menú principal</q-item-label>
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      class="app-drawer bg-secondary text-yellow"
+    >
+      <q-list padding class="app-drawer-list">
+        <q-item-label header class="text-grey-7">
+          {{ esAdmin ? 'Menú administrador' : 'Menú principal' }}
+        </q-item-label>
 
-        <q-item clickable v-ripple to="/dashboard">
-          <q-item-section avatar>
-            <q-icon name="dashboard" />
-          </q-item-section>
-          <q-item-section>Dashboard</q-item-section>
-        </q-item>
+        <!-- USUARIO -->
+        <template v-if="!esAdmin">
+          <q-item clickable v-ripple to="/dashboard" class="app-drawer-item">
+            <q-item-section avatar><q-icon name="dashboard" color="yellow" /></q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/billeteras">
-          <q-item-section avatar>
-            <q-icon name="account_balance_wallet" />
-          </q-item-section>
-          <q-item-section>Billeteras</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/billeteras" class="app-drawer-item">
+            <q-item-section avatar
+              ><q-icon name="account_balance_wallet" color="yellow"
+            /></q-item-section>
+            <q-item-section>Billeteras</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/cuentas-bancarias">
-          <q-item-section avatar>
-            <q-icon name="account_balance" />
-          </q-item-section>
-          <q-item-section> Cuentas Bancarias </q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/cuentas-bancarias" class="app-drawer-item">
+            <q-item-section avatar><q-icon name="account_balance" color="yellow" /></q-item-section>
+            <q-item-section>Cuentas Bancarias</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/mercado">
-          <q-item-section avatar>
-            <q-icon name="currency_exchange" />
-          </q-item-section>
-          <q-item-section>Mercado P2P</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/mercado">
+            <q-item-section avatar><q-icon name="currency_exchange" /></q-item-section>
+            <q-item-section>Mercado P2P</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/ofertas/crear">
-          <q-item-section avatar>
-            <q-icon name="add_business" />
-          </q-item-section>
-          <q-item-section>Crear Oferta</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/ofertas/crear">
+            <q-item-section avatar><q-icon name="add_business" /></q-item-section>
+            <q-item-section>Crear Oferta</q-item-section>
+          </q-item>
 
-        <q-item clickable v-ripple to="/mis-ofertas">
-          <q-item-section avatar>
-            <q-icon name="list_alt" />
-          </q-item-section>
-          <q-item-section>Mis Ofertas</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/mis-ofertas">
+            <q-item-section avatar><q-icon name="list_alt" /></q-item-section>
+            <q-item-section>Mis Ofertas</q-item-section>
+          </q-item>
 
-        <q-item clickable to="/historial">
-          <q-item-section avatar>
-            <q-icon name="history" />
-          </q-item-section>
+          <q-item clickable v-ripple to="/historial">
+            <q-item-section avatar><q-icon name="history" /></q-item-section>
+            <q-item-section>Historial</q-item-section>
+          </q-item>
+        </template>
 
-          <q-item-section> Historial </q-item-section>
-        </q-item>
+        <!-- ADMIN -->
+        <template v-else>
+          <q-item clickable v-ripple to="/admin">
+            <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
+            <q-item-section>Dashboard Admin</q-item-section>
+          </q-item>
 
-        <q-item v-if="userRole === 'ADM'" clickable v-ripple to="/admin">
-          <q-item-section avatar>
-            <q-icon name="admin_panel_settings" />
-          </q-item-section>
-          <q-item-section>Admin Panel</q-item-section>
-        </q-item>
+          <q-item clickable v-ripple to="/admin/movimientos">
+            <q-item-section avatar><q-icon name="fact_check" /></q-item-section>
+            <q-item-section>Movimientos</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple :to="{ path: '/admin/usuarios' }">
+            <q-item-section avatar>
+              <q-icon name="groups" />
+            </q-item-section>
+            <q-item-section>Usuarios</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/admin/monedas">
+            <q-item-section avatar><q-icon name="paid" /></q-item-section>
+            <q-item-section>Monedas</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/admin/historial">
+            <q-item-section avatar><q-icon name="manage_search" /></q-item-section>
+            <q-item-section>Historial Admin</q-item-section>
+          </q-item>
+        </template>
 
         <q-separator class="q-my-md" />
 
@@ -109,8 +113,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
@@ -119,28 +123,7 @@ const leftDrawerOpen = ref(false)
 const userName = localStorage.getItem('userName') || 'Usuario'
 const userRole = localStorage.getItem('userRole') || 'USU'
 
-// Verifica si estamos en el menú principal de admin (oculta drawer solo en /admin)
-const isAdminPage = computed(() => {
-  return route.path === '/admin'
-})
-
-// Avatar del usuario con color aleatorio
-const userAvatar = computed(() => {
-  const colors = ['blue', 'purple', 'teal', 'orange', 'indigo', 'green']
-  const userNameHash = userName.charCodeAt(0)
-  const color = colors[userNameHash % colors.length]
-  const initials = userName
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-
-  return {
-    icon: undefined,
-    text: initials,
-    color: color,
-  }
-})
+const esAdmin = computed(() => userRole === 'ADM')
 
 const logout = () => {
   localStorage.clear()
@@ -149,35 +132,79 @@ const logout = () => {
 </script>
 
 <style scoped>
-.header-bar {
-  background: #0b0e11;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-  border-bottom: 1px solid rgba(252, 213, 53, 0.1);
+.app-drawer,
+.app-drawer .q-drawer__content,
+.app-drawer .q-drawer__inner,
+.app-drawer .q-drawer__content .q-scrollarea__container,
+.app-drawer .q-drawer__content .q-scrollarea__content {
+  background-color: #071118 !important;
+  color: #e5e8ee !important;
+  border-color: rgba(240, 185, 11, 0.14) !important;
 }
 
-.logo-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #eaecef;
+.app-drawer.q-drawer--bordered,
+.app-drawer .q-drawer__content {
+  border-right: 1px solid rgba(240, 185, 11, 0.14) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
-.user-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.app-drawer-list {
+  min-height: 100%;
+  padding-top: 12px;
 }
 
-.user-info {
-  text-align: right;
-  color: #eaecef;
+.app-drawer .q-item {
+  border-radius: 12px;
+  margin-bottom: 6px;
+  background-color: transparent;
+  color: #e5e8ee;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
 }
 
-.user-name {
-  font-size: 14px;
+.app-drawer .q-item:hover {
+  background-color: rgba(240, 185, 11, 0.12);
+  transform: translateX(2px);
 }
 
-.user-role {
-  color: #848e9c;
-  font-size: 12px;
+.app-drawer .q-item.q-item--active,
+.app-drawer .q-item.q-item--active:hover,
+.app-drawer .q-item.active {
+  background-color: rgba(240, 185, 11, 0.18);
+}
+
+.app-drawer .q-item .q-item-section,
+.app-drawer .q-item--active .q-item__section,
+.app-drawer .q-item__label,
+.app-drawer .q-item-label {
+  color: #e5e8ee;
+}
+
+.app-drawer .q-item .q-item__section,
+.app-drawer .q-item .q-item__label,
+.app-drawer .q-item .q-item__section span,
+.app-drawer .q-item .q-item__section div {
+  color: inherit;
+}
+
+.app-drawer .q-icon,
+.app-drawer .q-item .q-item-section .q-icon,
+.app-drawer .q-item .q-item__section .q-icon {
+  color: #f0b90b !important;
+}
+
+.app-drawer .q-item-label {
+  color: #9aa4b5;
+  margin-bottom: 16px;
+}
+
+.app-drawer .q-separator {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.app-drawer .text-negative {
+  color: #ea5455 !important;
 }
 </style>

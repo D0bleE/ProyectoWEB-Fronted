@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-lg">
+  <q-page class="q-pa-lg admin-movimientos-page">
     <div class="text-h4 text-primary q-mb-sm">Administración de movimientos</div>
 
     <div class="text-grey-7 q-mb-lg">

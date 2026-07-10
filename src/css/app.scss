@@ -1,146 +1,452 @@
 // app global css
 
-// Estilos globales para tema oscuro Binance
-body,
 html,
+body,
 #q-app {
-  background-color: #0b0e11;
-  color: #eaecef;
+  min-height: 100%;
 }
 
-.q-page {
-  background-color: #0b0e11;
-  color: #eaecef;
+body {
+  background: #090c16;
+  color: #e5e8ee;
+}
+
+#q-app,
+.q-page,
+.q-layout {
+  background-color: #090c16;
+  color: #e5e8ee;
 }
 
 .q-card {
-  background-color: #1e2329;
-  color: #eaecef;
-  border: 1px solid #404656;
+  background-color: #121826 !important;
+  color: #e5e8ee;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.q-dialog__inner {
-  background-color: #1e2329;
-  color: #eaecef;
+.bg-white {
+  background-color: #171e2a !important;
+  color: #e5e8ee !important;
 }
 
-.q-drawer {
-  background-color: #1e2329;
-  color: #eaecef;
-  border-right: 1px solid #404656;
+.bg-grey-1 {
+  background-color: #101520 !important;
 }
 
-.q-item {
-  color: #eaecef;
+.bg-grey-2 {
+  background-color: #141c26 !important;
 }
 
-.q-item__label {
-  color: #848e9c;
+.bg-blue-1,
+.bg-blue {
+  background-color: #0d2d5f !important;
 }
 
-.q-field {
-  color: #eaecef;
+.text-grey-6,
+.text-grey-7,
+.text-grey-8,
+.text-grey-9 {
+  color: #9aa4b5 !important;
+}
+
+.text-positive {
+  color: #12b886 !important;
+}
+
+.text-negative {
+  color: #ea5455 !important;
+}
+
+.text-yellow {
+  color: #f0b90b !important;
+}
+
+.bg-red-1 {
+  background-color: rgba(234, 84, 85, 0.16) !important;
+  color: #ea5455 !important;
+}
+
+.bg-green-1 {
+  background-color: rgba(18, 184, 134, 0.16) !important;
+  color: #12b886 !important;
+}
+
+.bg-yellow-1 {
+  background-color: #f0b90b !important;
+  color: #141a20 !important;
+}
+
+/* Admin: forzar estilo oscuro en tarjetas y tablas que usan `bg-white` */
+.bg-white,
+.bg-white .q-card {
+  background-color: #0f1620 !important;
+  color: #e5e8ee !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.bg-white .q-table__top,
+.bg-white .q-table__middle,
+.bg-white .q-table__bottom,
+.bg-white .q-table__grid,
+.bg-white table,
+.bg-white thead,
+.bg-white tbody,
+.bg-white tr,
+.bg-white th,
+.bg-white td,
+.bg-white .q-tr,
+.bg-white .q-th,
+.bg-white .q-td {
+  background-color: transparent !important;
+  color: #e5e8ee !important;
+  border-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.bg-white thead th,
+.bg-white .q-th {
+  background-color: transparent !important;
+  color: #f0b90b !important;
+  font-weight: 700;
+}
+
+.bg-white tbody tr:hover,
+.bg-white .q-tr:hover {
+  background-color: rgba(240, 185, 11, 0.04) !important;
+}
+
+/* Acciones: botones dentro de tablas (aprobar/rechazar) */
+.bg-white .q-btn[outline][color='primary'],
+.bg-white .q-btn.color-primary {
+  background-color: transparent !important;
+  color: #12b886 !important;
+}
+
+.bg-white .q-btn[color='negative'],
+.bg-white .q-btn.color-negative {
+  color: #ea5455 !important;
+}
+
+/* Paginación y controles */
+.bg-white .q-table__bottom .q-select,
+.bg-white .q-table__top .q-select {
+  background-color: #0d1720 !important;
+  color: #e5e8ee !important;
+}
+
+/* Mejor contraste para enlaces 'VER VOUCHER' */
+.bg-white a,
+.bg-white .text-primary {
+  color: #f0b90b !important;
+}
+
+/* Estilos específicos para la página de administración de movimientos */
+.admin-movimientos-page .q-table,
+.admin-movimientos-page .q-table__top,
+.admin-movimientos-page .q-table__middle,
+.admin-movimientos-page .q-table__bottom,
+.admin-movimientos-page table,
+.admin-movimientos-page thead,
+.admin-movimientos-page tbody,
+.admin-movimientos-page tr,
+.admin-movimientos-page th,
+.admin-movimientos-page td,
+.admin-movimientos-page .q-th,
+.admin-movimientos-page .q-td {
+  background-color: transparent !important;
+  color: #e5e8ee !important;
+  border-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.admin-movimientos-page .q-table__title {
+  color: #f0b90b !important;
+  font-weight: 700;
+}
+
+.admin-movimientos-page thead th,
+.admin-movimientos-page .q-th {
+  background-color: transparent !important;
+  color: #f0b90b !important;
+}
+
+.admin-movimientos-page .q-table__container {
+  background-color: rgba(15, 22, 32, 0.6) !important;
+  padding: 0 !important;
+}
+
+.admin-movimientos-page .q-table--flat .q-tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.01) !important;
+}
+
+.admin-movimientos-page .q-btn[label='Ver voucher'],
+.admin-movimientos-page .q-btn[icon='image'] {
+  color: #f0b90b !important;
+}
+
+/* Evitar parpadeo blanco al cambiar tabs (Historial) */
+.q-tab-panels,
+.q-tab-panels__content,
+.q-tab-panel,
+.q-tab-panel > *,
+.q-tab-panels .q-panel {
+  background-color: transparent !important;
+  color: #e5e8ee !important;
+}
+
+/* Forzar fondo oscuro en tablas mientras se renderizan/transicionan */
+.q-table,
+.q-table__container,
+.q-table__middle,
+.q-table__top,
+.q-table__bottom,
+.q-table table,
+.q-table thead,
+.q-table tbody,
+.q-table tr,
+.q-table td,
+.q-table th {
+  background-color: transparent !important;
+  color: #e5e8ee !important;
+}
+
+/* Transitions: asegurar paneles de transición con fondo oscuro */
+.q-fade-transition,
+.q-slide-transition,
+.q-zoom-transition,
+.q-tab-panels .q-fade-transition,
+.q-tab-panels .q-slide-transition {
+  background-color: transparent !important;
+}
+
+/* Inputs y campos de formulario oscuros, legibles y consistentes */
+.q-field,
+.q-field__control,
+.q-input,
+.q-select,
+.q-textarea,
+.q-field--outlined .q-field__control,
+.q-field--bordered .q-field__control {
+  background-color: #121f33 !important;
+  color: #e1e8f0 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.q-field .q-field__native,
+.q-select .q-field__native,
+.q-textarea .q-field__native,
+input,
+textarea {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+.q-field .q-field__native::placeholder,
+.q-select .q-field__native::placeholder,
+textarea::placeholder,
+input::placeholder {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.q-field .q-field__label,
+.q-field .q-field__bottom,
+.q-field .q-field__hint,
+.q-select .q-field__label,
+.q-field__label {
+  color: #b8c3d6 !important;
+}
+
+.q-field--focused .q-field__label,
+.q-field--focused .q-field__hint,
+.q-field--focused .q-field__control,
+.q-field--focused .q-field__native {
+  color: #f0b90b !important;
+  border-color: rgba(240, 185, 11, 0.35) !important;
 }
 
 .q-field__control {
-  color: #eaecef;
+  box-shadow: none !important;
 }
 
-.q-field__native,
-.q-field__input {
-  color: #eaecef;
+/* Estilos para el simulador de divisas en Dashboard */
+.simulator-section .sim-input .q-field__control {
+  min-height: 56px !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.q-input__control {
-  color: #eaecef;
+.sim-input .q-field__native {
+  color: #ffffff !important;
+  font-weight: 600;
+  width: 100%;
+  padding: 8px 0 !important;
+  line-height: 1 !important;
 }
 
-// Inputs y selects con borde gris
-.q-field--outlined .q-field__control:before {
-  border-color: #404656;
+.sim-append {
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
 }
 
-.q-field--outlined:hover .q-field__control:before {
-  border-color: #fcd535;
+.simulator-dest-row .readonly-input .q-field__control {
+  background-color: transparent !important;
 }
 
-.q-field--outlined.q-field--focused .q-field__control:before {
-  border-color: #fcd535;
+.simulator-section label {
+  display: block;
+  margin-bottom: 6px;
 }
 
-// Labels de inputs
-.q-field__label {
-  color: #848e9c;
+/* Ensure the append slot contents are vertically centered */
+.sim-input .q-field__append {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
 }
 
-.q-field--focused .q-field__label {
-  color: #eaecef;
+/* Ajuste fino: bajar un poco la columna de 'Moneda origen' para alinear con las otras cajas */
+.simulator-section > .col-12.col-md-4:first-of-type {
+  padding-top: 24px !important;
 }
 
-.q-separator {
-  background-color: #404656;
+/* Menús desplegables estilo oscuro para selects */
+.q-menu,
+.q-menu__content,
+.q-select__dropdown,
+.q-select__dropdown .q-list,
+.q-select__dropdown .q-list__section,
+.q-select__dropdown .q-item,
+.q-select__dropdown .q-item__section,
+.q-select__dropdown .q-item-label,
+.q-select__dropdown .q-item .q-item__label {
+  background-color: #121f33 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.text-grey-7 {
-  color: #848e9c;
+.q-select__dropdown .q-item:hover,
+.q-select__dropdown .q-item.q-item--active,
+.q-select__dropdown .q-item.q-item--active:hover {
+  background-color: rgba(240, 185, 11, 0.14) !important;
 }
 
-.text-grey-8 {
-  color: #eaecef;
+.q-select__dropdown .q-item__section,
+.q-select__dropdown .q-item__label {
+  color: #ffffff !important;
 }
 
-// Tablas oscuras
-.q-table {
-  background-color: #1e2329;
-  color: #eaecef;
+.q-menu__content,
+.q-dialog__inner,
+.q-dialog__content,
+.q-dialog .q-card,
+.q-dialog__wrapper,
+.q-dialog__container,
+.q-popup,
+.q-popover,
+.q-tooltip,
+.q-menu,
+.q-menu__content,
+.q-date__calendar,
+.q-time__content {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.q-table__card {
-  background-color: #1e2329;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  border: 1px solid #404656;
+/* Overlay transparente para que el diálogo se vea como ventana sobrepuesta */
+.q-dialog__backdrop,
+.q-popup__backdrop,
+.q-popover__backdrop {
+  background-color: rgba(0, 0, 0, 0.22) !important;
 }
 
-.q-table thead tr,
-.q-table tbody td {
-  border-color: #404656;
+.q-dialog,
+.q-dialog__inner,
+.q-dialog__wrapper,
+.q-dialog__container,
+.q-dialog__content,
+.q-popup__content,
+.q-popover__content,
+.q-menu__content {
+  background-color: transparent !important;
 }
 
-.q-table tbody tr:hover {
-  background-color: rgba(252, 213, 53, 0.05);
+.q-dialog .q-card,
+.q-popup .q-card,
+.q-popover .q-card,
+.q-menu__content .q-card {
+  background-color: rgba(18, 25, 51, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.45) !important;
+  border-radius: 18px !important;
 }
 
-.q-table thead tr {
-  background-color: rgba(0, 0, 0, 0.3);
+.q-dialog .q-card *,
+.q-menu__content *,
+.q-popup *,
+.q-popover *,
+.q-tooltip * {
+  color: #ffffff !important;
 }
 
-// Estilos para banners oscuros con bordes grises y letras blancas
-.bg-negative-dark {
-  background-color: rgba(246, 70, 93, 0.15);
-  border: 1px solid #404656;
-  color: #eaecef;
+.q-dialog .q-card .q-btn,
+.q-popup .q-btn,
+.q-popover .q-btn,
+.q-menu__content .q-btn {
+  color: #ffffff !important;
 }
 
-.bg-positive-dark {
-  background-color: rgba(14, 203, 129, 0.15);
-  border: 1px solid #404656;
-  color: #eaecef;
+.q-dialog .q-card .q-field,
+.q-popup .q-field,
+.q-popover .q-field,
+.q-menu__content .q-field {
+  background-color: #121f33 !important;
 }
 
-.bg-warning-dark {
-  background-color: rgba(242, 153, 78, 0.15);
-  border: 1px solid #404656;
-  color: #eaecef;
+/* Banners dentro de popups y diálogos: fondo translúcido y texto contrastado */
+.q-dialog .q-banner,
+.q-popup .q-banner,
+.q-popover .q-banner,
+.q-menu__content .q-banner {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f5f7fb !important;
 }
 
-.bg-info-dark {
-  background-color: rgba(49, 204, 236, 0.15);
-  border: 1px solid #404656;
-  color: #eaecef;
+.q-dialog .q-banner.bg-red-1,
+.q-popup .q-banner.bg-red-1,
+.q-popover .q-banner.bg-red-1,
+.q-menu__content .q-banner.bg-red-1 {
+  background-color: rgba(234, 84, 85, 0.14) !important;
+  color: #ffffff !important;
 }
 
-.bg-primary-dark {
-  background-color: rgba(252, 213, 53, 0.15);
-  border: 1px solid #404656;
-  color: #eaecef;
+.q-dialog .q-banner.bg-green-1,
+.q-popup .q-banner.bg-green-1,
+.q-popover .q-banner.bg-green-1,
+.q-menu__content .q-banner.bg-green-1 {
+  background-color: rgba(18, 184, 134, 0.14) !important;
+  color: #ffffff !important;
+}
+
+.q-dialog .q-banner.bg-yellow-1,
+.q-popup .q-banner.bg-yellow-1,
+.q-popover .q-banner.bg-yellow-1,
+.q-menu__content .q-banner.bg-yellow-1 {
+  background-color: rgba(240, 185, 11, 0.14) !important;
+  color: #141a20 !important;
+}
+
+.q-dialog .q-banner .text-positive,
+.q-dialog .q-banner .text-negative,
+.q-dialog .q-banner .text-yellow,
+.q-popup .q-banner .text-positive,
+.q-popup .q-banner .text-negative,
+.q-popup .q-banner .text-yellow,
+.q-popover .q-banner .text-positive,
+.q-popover .q-banner .text-negative,
+.q-popover .q-banner .text-yellow,
+.q-menu__content .q-banner .text-positive,
+.q-menu__content .q-banner .text-negative,
+.q-menu__content .q-banner .text-yellow {
+  color: #ffffff !important;
 }

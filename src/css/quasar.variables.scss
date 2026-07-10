@@ -1,29 +1,15 @@
 // Quasar Sass (& SCSS) Variables
 // --------------------------------------------------
-// To customize the look and feel of this app, you can override
-// the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
+// Binance-inspired palette: dark surfaces with bright yellow highlights.
 
-// Check documentation for full list of Quasar variables
+$primary: #f0b90b;
+$secondary: #141a20;
+$accent: #1f8bff;
 
-// Your own variables (that are declared here) and Quasar's own
-// ones will be available out of the box in your .vue/.scss/.sass files
+$dark: #0b0f1a;
+$dark-page: #090c16;
 
-// It's highly recommended to change the default colors
-// to match your app's branding.
-// Tip: Use the "Theme Builder" on Quasar's documentation website.
-
-$primary: #fcd535; // Amarillo Binance
-$secondary: #26a69a;
-$accent: #9c27b0;
-
-$dark: #0b0e11; // Fondo principal negro/gris muy oscuro
-$dark-page: #1e2329; // Paneles y tarjetas
-
-$positive: #0ecb81; // Verde alcista
-$negative: #f6465d; // Rojo bajista
-$info: #31ccec;
-$warning: #f2994e; // Naranja secundario
-
-// Colores personalizados para texto
-$text-primary: #eaecef; // Texto principal blanco humo
-$text-secondary: #848e9c; // Texto secundario gris apagado
+$positive: #12b886;
+$negative: #ea5455;
+$info: #00a3ff;
+$warning: #f0b90b;

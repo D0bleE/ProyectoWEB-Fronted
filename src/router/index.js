@@ -22,13 +22,7 @@ export default defineRouter(() => {
 
   Router.beforeEach((to, from, next) => {
     const token = localStorage.getItem('token')
-
-    const userRole = localStorage.getItem('userRole')
-
-    if (to.meta.requiresAdmin && userRole !== 'ADM') {
-      next('/dashboard')
-      return
-    }
+    const userRole = localStorage.getItem('userRole') || 'USU'
 
     if (to.meta.requiresAuth && !token) {
       next('/login')
@@ -36,7 +30,17 @@ export default defineRouter(() => {
     }
 
     if ((to.path === '/login' || to.path === '/register') && token) {
+      next(userRole === 'ADM' ? '/admin' : '/dashboard')
+      return
+    }
+
+    if (to.meta.requiresAdmin && userRole !== 'ADM') {
       next('/dashboard')
+      return
+    }
+
+    if (userRole === 'ADM' && !to.path.startsWith('/admin') && to.meta.requiresAuth) {
+      next('/admin')
       return
     }
 
