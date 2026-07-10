@@ -17,12 +17,15 @@ import LoginForm from 'src/components/auth/LoginForm.vue'
 <style scoped>
 .auth-page {
   min-height: 100vh;
-  background: #f4f6f8;
+  background: #090c16;
 }
 
 .auth-card {
   width: 400px;
   max-width: 92vw;
   border-radius: 22px;
+  background-color: #121826;
+  color: #e5e8ee;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 </style>

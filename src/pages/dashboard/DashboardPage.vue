@@ -87,7 +87,7 @@
               <div class="tooltip-rate">USD: {{ formatoTipoCambio(hoveredPoint.rate) }}</div>
             </div>
           </div>
-          <div class="row q-col-gutter-lg q-mt-md">
+          <div class="row q-col-gutter-lg q-mt-md simulator-section">
             <div class="col-12 col-md-4">
               <label class="text-subtitle2 text-grey-8">Moneda origen</label>
               <q-input
@@ -95,37 +95,64 @@
                 type="number"
                 outlined
                 dense
-                class="q-mt-xs bg-grey-1"
+                class="q-mt-xs sim-input"
                 placeholder="0.00"
                 @update:model-value="calculateSimulator"
               >
                 <template v-slot:append>
-                  <span class="text-primary text-subtitle2 text-weight-bold">PEN</span>
+                  <span class="text-primary text-subtitle2 text-weight-bold sim-append">PEN</span>
                 </template>
               </q-input>
             </div>
 
             <div class="col-12 col-md-8">
               <label class="text-subtitle2 text-grey-8">Moneda destino</label>
-              <div class="row q-col-gutter-md q-mt-none">
+              <div class="row q-col-gutter-md q-mt-none simulator-dest-row">
                 <div class="col-12 col-md-4">
-                  <q-input :model-value="simulatorData.usd" type="number" outlined dense readonly>
+                  <q-input
+                    :model-value="simulatorData.usd"
+                    type="number"
+                    outlined
+                    dense
+                    readonly
+                    class="sim-input readonly-input"
+                  >
                     <template v-slot:append>
-                      <span class="text-primary text-subtitle2 text-weight-bold">USD</span>
+                      <span class="text-primary text-subtitle2 text-weight-bold sim-append"
+                        >USD</span
+                      >
                     </template>
                   </q-input>
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input :model-value="simulatorData.eur" type="number" outlined dense readonly>
+                  <q-input
+                    :model-value="simulatorData.eur"
+                    type="number"
+                    outlined
+                    dense
+                    readonly
+                    class="sim-input readonly-input"
+                  >
                     <template v-slot:append>
-                      <span class="text-primary text-subtitle2 text-weight-bold">EUR</span>
+                      <span class="text-primary text-subtitle2 text-weight-bold sim-append"
+                        >EUR</span
+                      >
                     </template>
                   </q-input>
                 </div>
                 <div class="col-12 col-md-4">
-                  <q-input :model-value="simulatorData.cny" type="number" outlined dense readonly>
+                  <q-input
+                    :model-value="simulatorData.cny"
+                    type="number"
+                    outlined
+                    dense
+                    readonly
+                    class="sim-input readonly-input"
+                  >
                     <template v-slot:append>
-                      <span class="text-primary text-subtitle2 text-weight-bold">CNY</span>
+                      <span class="text-primary text-subtitle2 text-weight-bold sim-append"
+                        >CNY</span
+                      >
                     </template>
                   </q-input>
                 </div>
@@ -274,8 +301,8 @@ const drawChart = () => {
   // Dibujar líneas de grid
   ctx.font = '12px Inter, sans-serif'
   ctx.lineWidth = 1
-  ctx.strokeStyle = '#e0e0e0'
-  ctx.fillStyle = '#666'
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+  ctx.fillStyle = '#9aa4b5'
 
   for (let i = 0; i <= gridLines; i += 1) {
     const y = padding.top + (plotHeight / gridLines) * i
@@ -289,7 +316,7 @@ const drawChart = () => {
   }
 
   // Dibujar ejes
-  ctx.strokeStyle = '#999'
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)'
   ctx.lineWidth = 2
   ctx.beginPath()
   ctx.moveTo(padding.left, padding.top)
@@ -305,7 +332,7 @@ const drawChart = () => {
   })
 
   // Dibujar curva suave usando quadraticCurve
-  ctx.strokeStyle = '#027be3'
+  ctx.strokeStyle = '#f0b90b'
   ctx.lineWidth = 2.5
   ctx.beginPath()
   ctx.moveTo(points[0].x, points[0].y)
@@ -324,7 +351,7 @@ const drawChart = () => {
   ctx.stroke()
 
   // Dibujar área bajo la curva
-  ctx.fillStyle = 'rgba(2, 123, 227, 0.12)'
+  ctx.fillStyle = 'rgba(240, 185, 11, 0.18)'
   ctx.beginPath()
   ctx.moveTo(points[0].x, points[0].y)
 
@@ -345,7 +372,7 @@ const drawChart = () => {
   ctx.fill()
 
   // Dibujar puntos en cada dato
-  ctx.fillStyle = '#027be3'
+  ctx.fillStyle = '#f0b90b'
   points.forEach((point) => {
     ctx.beginPath()
     ctx.arc(point.x, point.y, 3, 0, Math.PI * 2)
@@ -353,7 +380,7 @@ const drawChart = () => {
   })
 
   // Dibujar etiquetas de fechas
-  ctx.fillStyle = '#444'
+  ctx.fillStyle = '#9aa4b5'
   ctx.textAlign = 'center'
 
   const labelStep = Math.max(1, Math.floor(chartData.value.length / 6))
@@ -406,37 +433,6 @@ onMounted(loadExchangeData)
   position: relative;
 }
 
-.chart-tooltip {
-  position: fixed;
-  background-color: #333;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 1000;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform: translate(-50%, -100%);
-}
-
-.tooltip-date {
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.tooltip-rate {
-  color: #ffd700;
-  font-weight: 600;
-}
-
-/* ELIMINA las clases .input-group, .input-wrapper y .currency-label */
-
-.chart-container {
-  position: relative;
-  /* Asegura que los elementos absolutos hijos no se desborden visualmente */
-}
-
 .chart-canvas {
   width: 100%;
   max-width: 100%;
@@ -444,46 +440,52 @@ onMounted(loadExchangeData)
   cursor: crosshair;
 }
 
-/* Línea vertical guía que sigue al puntero */
 .chart-crosshair {
   position: absolute;
-  top: 30px; /* Igual al padding.top de tu canvas */
-  bottom: 40px; /* Igual al padding.bottom de tu canvas */
+  top: 30px;
+  bottom: 40px;
   width: 1px;
-  background-color: rgba(2, 123, 227, 0.4);
+  background-color: rgba(240, 185, 11, 0.35);
   pointer-events: none;
   z-index: 10;
   transform: translateX(-50%);
 }
 
 .chart-tooltip {
-  position: absolute; /* Cambiado de fixed a absolute */
-  background-color: rgba(33, 33, 33, 0.95);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
+  position: absolute;
+  background-color: rgba(9, 12, 22, 0.96);
+  color: #e5e8ee;
+  padding: 10px 14px;
+  border-radius: 8px;
   font-size: 13px;
   pointer-events: none;
   z-index: 1000;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  /* Centrado horizontal y elevado para no tapar el punto */
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
   transform: translate(-50%, -100%);
   transition:
     top 0.1s ease,
-    left 0.1s ease; /* Movimiento suave */
+    left 0.1s ease;
 }
 
 .tooltip-date {
   font-weight: 500;
   margin-bottom: 4px;
   font-size: 11px;
-  color: #ccc;
+  color: #9aa4b5;
 }
 
 .tooltip-rate {
-  color: #f2c037; /* Color de advertencia clásico de Quasar */
-  font-weight: bold;
+  color: #f0b90b;
+  font-weight: 700;
   font-size: 14px;
+}
+
+.chart-legend {
+  color: #c8d1e0;
+}
+
+.chart-legend span {
+  color: #9aa4b5;
 }
 </style>
