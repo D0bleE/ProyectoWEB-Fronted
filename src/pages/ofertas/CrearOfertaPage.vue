@@ -64,7 +64,10 @@
         class="q-mb-sm"
       />
 
-      <q-banner v-if="montoSuperaSaldo" class="bg-red-1 text-negative q-mb-md rounded-borders">
+      <q-banner
+        v-if="montoSuperaSaldo"
+        class="bg-negative-dark text-negative q-mb-md rounded-borders"
+      >
         El monto ingresado supera tu saldo disponible.
       </q-banner>
 
@@ -110,7 +113,10 @@
         </template>
       </q-select>
 
-      <q-banner v-if="referenciaMensaje" class="bg-yellow-1 text-grey-9 q-mb-md rounded-borders">
+      <q-banner
+        v-if="referenciaMensaje"
+        class="bg-warning-dark text-warning q-mb-md rounded-borders"
+      >
         Referencia actual: {{ referenciaMensaje }}
       </q-banner>
 
@@ -122,7 +128,7 @@
         class="q-mb-md"
       />
 
-      <q-banner class="bg-grey-2 text-grey-8 q-mb-md rounded-borders">
+      <q-banner class="bg-info-dark text-info q-mb-md rounded-borders">
         Monto a recibir:
         <strong>
           {{ monedaDestino?.monedaSimbolo || '' }}
@@ -131,7 +137,7 @@
         </strong>
       </q-banner>
 
-      <q-banner class="bg-blue-1 text-primary q-mb-md rounded-borders">
+      <q-banner class="bg-primary-dark text-primary q-mb-md rounded-borders">
         Al publicar la oferta, el monto ofrecido será bloqueado temporalmente en tu billetera.
       </q-banner>
 
@@ -145,11 +151,11 @@
       />
     </q-card>
 
-    <q-banner v-if="message" class="bg-green-1 text-positive q-mt-md rounded-borders">
+    <q-banner v-if="message" class="bg-positive-dark text-positive q-mt-md rounded-borders">
       {{ message }}
     </q-banner>
 
-    <q-banner v-if="errorMessage" class="bg-red-1 text-negative q-mt-md rounded-borders">
+    <q-banner v-if="errorMessage" class="bg-negative-dark text-negative q-mt-md rounded-borders">
       {{ errorMessage }}
     </q-banner>
   </q-page>

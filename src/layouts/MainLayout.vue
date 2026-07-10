@@ -117,6 +117,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 const leftDrawerOpen = ref(false)
 
 const userName = localStorage.getItem('userName') || 'Usuario'
