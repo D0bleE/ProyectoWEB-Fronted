@@ -67,18 +67,24 @@ const routes = [
         component: () => import('pages/admin/AdminUsuariosPage.vue'),
         meta: { requiresAuth: true, requiresAdmin: true },
       },
+
+      {
+        path: 'admin/historial',
+        component: () => import('pages/admin/AdminHistorialPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+      },
+
       {
         path: 'admin/monedas',
         component: () => import('pages/admin/AdminMonedasPage.vue'),
         meta: { requiresAuth: true, requiresAdmin: true },
       },
+
       {
         path: 'historial',
         component: () => import('pages/historial/HistorialPage.vue'),
         meta: { requiresAuth: true },
       },
-
-      
     ],
   },
 
