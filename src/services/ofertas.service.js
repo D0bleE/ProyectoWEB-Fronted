@@ -31,3 +31,8 @@ export const obtenerHistorialP2P = async (usuarioId) => {
   const response = await api.get(`/Ofertas/historial/${usuarioId}`)
   return response.data
 }
+
+export const obtenerMatches = async (usuarioId) => {
+  const response = await api.get(`/Ofertas/matches/${usuarioId}`)
+  return response.data
+}

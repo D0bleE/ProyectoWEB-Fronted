@@ -59,6 +59,13 @@
             <q-item-section>Mis Ofertas</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/matches">
+            <q-item-section avatar>
+              <q-icon name="handshake" />
+            </q-item-section>
+            <q-item-section> Mis Matches </q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/historial">
             <q-item-section avatar><q-icon name="history" /></q-item-section>
             <q-item-section>Historial</q-item-section>

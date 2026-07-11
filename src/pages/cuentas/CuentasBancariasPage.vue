@@ -119,7 +119,7 @@
             label="Código de cuenta interbancario (CCI)"
             mask="###-###-############-##"
             unmasked-value
-            maxlength="20"
+            maxlength="23"
             counter
             hint="El CCI debe contener exactamente 20 dígitos."
             :error="cciTocado && !cciValido"
