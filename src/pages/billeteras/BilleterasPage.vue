@@ -15,11 +15,24 @@
         :key="billetera.monedaCodigo"
         class="col-12 col-sm-6 col-md-4"
       >
-        <q-card class="q-pa-md wallet-card">
+        <q-card
+          class="q-pa-md wallet-card"
+          :class="{ 'wallet-card--disabled': !billetera.monedaActiva }"
+        >
           <div class="row items-center justify-between">
             <div>
               <div class="text-h6">{{ billetera.monedaCodigo }}</div>
               <div class="text-grey-7">{{ billetera.monedaNombre }}</div>
+              <q-chip
+                v-if="!billetera.monedaActiva"
+                color="grey-7"
+                text-color="white"
+                icon="block"
+                dense
+                class="q-mt-sm"
+              >
+                Moneda deshabilitada
+              </q-chip>
             </div>
 
             <div class="row items-center q-gutter-sm">
@@ -32,21 +45,28 @@
               </q-chip>
             </div>
           </div>
-
+          <q-banner
+            v-if="!billetera.monedaActiva"
+            class="bg-grey-3 text-grey-9 q-mt-md rounded-borders"
+          >
+            <q-icon name="block" class="q-mr-sm" />
+            Esta moneda fue deshabilitada por el administrador. Tu saldo permanece seguro, pero no
+            podrás realizar operaciones.
+          </q-banner>
           <q-separator class="q-my-md" />
 
           <div class="text-grey-7">Saldo disponible</div>
 
           <div class="text-h5 text-teal-7 q-mb-md">
             {{ billetera.monedaSimbolo }}
-            {{ billetera.saldoDisponible.toFixed(2) }}
+            {{ billetera.saldoDisponible }}
           </div>
 
           <div v-if="billetera.saldoBloqueado > 0">
             <div class="text-grey-7">Saldo bloqueado</div>
             <div class="text-orange-8 text-h6">
               {{ billetera.monedaSimbolo }}
-              {{ billetera.saldoBloqueado.toFixed(2) }}
+              {{ billetera.saldoBloqueado }}
             </div>
           </div>
 
@@ -56,8 +76,11 @@
               icon="add"
               label="Recargar"
               size="sm"
+              :disable="!billetera.monedaActiva"
               @click="abrirRecarga(billetera)"
-            />
+            >
+              <q-tooltip v-if="!billetera.monedaActiva"> Esta moneda está deshabilitada </q-tooltip>
+            </q-btn>
 
             <q-btn
               outline
@@ -65,8 +88,11 @@
               icon="remove"
               label="Retirar"
               size="sm"
+              :disable="!billetera.monedaActiva"
               @click="abrirRetiro(billetera)"
-            />
+            >
+              <q-tooltip v-if="!billetera.monedaActiva"> Esta moneda está deshabilitada </q-tooltip>
+            </q-btn>
           </div>
         </q-card>
       </div>
@@ -120,8 +146,13 @@
             color="primary"
             label="Enviar solicitud"
             :loading="savingRecarga"
+            :disable="!formularioRecargaValido || savingRecarga"
             @click="guardarRecarga"
-          />
+          >
+            <q-tooltip v-if="!formularioRecargaValido">
+              Completa el monto y adjunta un voucher.
+            </q-tooltip>
+          </q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -172,8 +203,13 @@
             color="negative"
             label="Enviar solicitud"
             :loading="savingRetiro"
+            :disable="!formularioRetiroValido || savingRetiro"
             @click="guardarRetiro"
-          />
+          >
+            <q-tooltip v-if="!formularioRetiroValido">
+              Completa todos los campos para continuar.
+            </q-tooltip>
+          </q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -229,6 +265,20 @@ const cuentasFiltradas = computed(() => {
       id: cuenta.id,
       label: `${cuenta.banco} - ${cuenta.numeroCuenta}`,
     }))
+})
+
+const formularioRecargaValido = computed(() => {
+  return formRecarga.value.monto > 0 && formRecarga.value.voucher != null
+})
+const formularioRetiroValido = computed(() => {
+  if (!billeteraSeleccionada.value) return false
+
+  return (
+    formRetiro.value.monto > 0 &&
+    formRetiro.value.monto <= billeteraSeleccionada.value.saldoDisponible &&
+    formRetiro.value.cuentaId != null &&
+    cuentasFiltradas.value.length > 0
+  )
 })
 
 const cargarBilleteras = async () => {
@@ -375,5 +425,11 @@ onMounted(() => {
 <style scoped>
 .wallet-card {
   border-radius: 16px;
+  transition: all 0.25s ease;
+}
+
+.wallet-card--disabled {
+  opacity: 0.65;
+  background-color: #f5f5f5;
 }
 </style>
