@@ -70,6 +70,24 @@
               <span v-else>-</span>
             </q-td>
           </template>
+
+          <template #body-cell-fechaSolicitud="props">
+            <q-td :props="props">
+              <div class="fecha-hora-cell">
+                <div>{{ formatearFecha(props.row.fechaSolicitud) }}</div>
+                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaSolicitud) }}</div>
+              </div>
+            </q-td>
+          </template>
+
+          <template #body-cell-fechaProcesado="props">
+            <q-td :props="props">
+              <div class="fecha-hora-cell">
+                <div>{{ formatearFecha(props.row.fechaProcesado) }}</div>
+                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaProcesado) }}</div>
+              </div>
+            </q-td>
+          </template>
         </q-table>
       </q-tab-panel>
 
@@ -120,6 +138,24 @@
               <q-chip :color="colorEstadoP2P(props.row.estado)" text-color="white">
                 {{ props.row.estado }}
               </q-chip>
+            </q-td>
+          </template>
+
+          <template #body-cell-fechaPublicacion="props">
+            <q-td :props="props">
+              <div class="fecha-hora-cell">
+                <div>{{ formatearFecha(props.row.fechaPublicacion) }}</div>
+                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaPublicacion) }}</div>
+              </div>
+            </q-td>
+          </template>
+
+          <template #body-cell-fechaTransaccion="props">
+            <q-td :props="props">
+              <div class="fecha-hora-cell">
+                <div>{{ formatearFecha(props.row.fechaTransaccion) }}</div>
+                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaTransaccion) }}</div>
+              </div>
             </q-td>
           </template>
         </q-table>
@@ -222,6 +258,31 @@ const colorEstadoP2P = (estado) => {
   return 'orange'
 }
 
+const formatearFecha = (valor) => {
+  if (!valor) return '-'
+
+  const fecha = new Date(valor)
+  if (Number.isNaN(fecha.getTime())) return valor
+
+  return fecha.toLocaleDateString('es-ES', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+const formatearHora = (valor) => {
+  if (!valor) return '-'
+
+  const fecha = new Date(valor)
+  if (Number.isNaN(fecha.getTime())) return valor
+
+  return fecha.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 const verVoucher = (movimiento) => {
   voucherSeleccionado.value = `${apiBaseUrl}${movimiento.rutaVoucher}`
   dialogVoucher.value = true
@@ -306,5 +367,12 @@ onMounted(() => {
 .voucher-image {
   width: 100%;
   border-radius: 12px;
+}
+
+.fecha-hora-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.2;
 }
 </style>
