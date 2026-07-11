@@ -384,10 +384,7 @@ const cargarTipoCambioEnVivo = async () => {
     cargandoTipoCambio.value = true
     errorTipoCambio.value = ''
 
-    const data = await obtenerTipoCambioEnVivo({
-      desde: codigoTengo,
-      hacia: codigoQuiero,
-    })
+    const data = await obtenerTipoCambioEnVivo(codigoTengo, codigoQuiero)
 
     tipoCambioEnVivo.value = data
   } catch (error) {
