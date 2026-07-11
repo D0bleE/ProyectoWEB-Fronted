@@ -179,15 +179,17 @@ const form = ref({
 })
 
 const monedasOptions = computed(() =>
-  billeteras.value.map((b) => ({
-    id: b.monedaId,
-    codigo: b.monedaCodigo,
-    nombre: b.monedaNombre,
-    simbolo: b.monedaSimbolo,
-    bandera: b.monedaBandera,
-    saldo: Number(b.saldoDisponible),
-    label: `${b.monedaCodigo} - ${b.monedaNombre}`,
-  })),
+  billeteras.value
+    .filter((b) => b.monedaActiva)
+    .map((b) => ({
+      id: b.monedaId,
+      codigo: b.monedaCodigo,
+      nombre: b.monedaNombre,
+      simbolo: b.monedaSimbolo,
+      bandera: b.monedaBandera,
+      saldo: Number(b.saldoDisponible),
+      label: `${b.monedaCodigo} - ${b.monedaNombre}`,
+    })),
 )
 
 const monedaOrigen = computed(() =>

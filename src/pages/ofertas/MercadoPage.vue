@@ -131,8 +131,29 @@
             {{ oferta.creadorNombre }}
           </div>
 
-          <div class="text-grey-7 q-mb-md">Oferta disponible</div>
+          <div class="row items-center q-mt-xs q-mb-sm">
+            <q-rating
+              readonly
+              color="amber"
+              :model-value="Number(oferta.calificacionPromedio || 0)"
+              :max="5"
+              size="18px"
+            />
 
+            <span class="q-ml-sm text-caption text-grey-7">
+              <template v-if="oferta.totalCalificaciones > 0">
+                {{ Number(oferta.calificacionPromedio).toFixed(1) }}
+                ({{ oferta.totalCalificaciones }}
+                {{ oferta.totalCalificaciones === 1 ? 'calificación' : 'calificaciones' }})
+              </template>
+
+              <template v-else> Sin calificaciones </template>
+            </span>
+          </div>
+
+          <q-chip color="positive" text-color="white" dense class="q-mb-md">
+            Oferta disponible
+          </q-chip>
           <div class="row q-col-gutter-sm">
             <div class="col-6">
               <div class="text-caption text-grey-7">Tengo</div>

@@ -1,9 +1,12 @@
 import axios from 'axios'
 import { api } from 'boot/axios'
 
-export const obtenerTipoCambioEnVivo = async ({ desde, hacia }) => {
+export const obtenerTipoCambioEnVivo = async (desde, hacia) => {
   const response = await api.get('/TipoCambio/en-vivo', {
-    params: { desde, hacia },
+    params: {
+      desde,
+      hacia,
+    },
   })
 
   return response.data

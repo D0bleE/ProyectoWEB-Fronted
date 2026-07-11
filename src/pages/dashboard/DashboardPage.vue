@@ -1,491 +1,820 @@
 <template>
   <q-page class="q-pa-lg">
-    <div class="row items-center justify-between">
+    <!-- ENCABEZADO -->
+    <div class="row items-center justify-between q-mb-lg">
       <div>
-        <div class="text-h4 text-primary">Bienvenido, {{ userName }} 👋</div>
-        <div class="text-grey-7 q-mt-sm">Plataforma P2P de cambio de divisas.</div>
+        <div class="text-h4 text-primary">Bienvenido, {{ userName }}</div>
+
+        <div class="text-grey-7 q-mt-xs">
+          Consulta y simula conversiones con las monedas activas de la plataforma.
+        </div>
       </div>
+
       <q-btn
-        color="primary"
-        label="Actualizar"
         outline
-        @click="loadExchangeData"
-        :loading="loading"
+        color="primary"
+        icon="refresh"
+        label="Actualizar tasa"
+        :loading="loadingTasa"
+        :disable="!parValido"
+        @click="consultarTipoCambio"
       />
     </div>
 
-    <div class="row q-col-gutter-md q-mt-lg">
-      <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
-            <div class="text-subtitle2">Soles a Dólares</div>
-            <div class="text-h6 q-mt-sm">Tipo de cambio</div>
-            <div class="text-h4 text-primary q-mt-xs">{{ formatoTipoCambio(rates.usd) }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
+    <!-- ERROR GENERAL -->
+    <q-banner v-if="errorMessage" class="bg-red-1 text-negative q-mb-md rounded-borders">
+      {{ errorMessage }}
+    </q-banner>
 
-      <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
-            <div class="text-subtitle2">Soles a Euros</div>
-            <div class="text-h6 q-mt-sm">Tipo de cambio</div>
-            <div class="text-h4 text-primary q-mt-xs">{{ formatoTipoCambio(rates.eur) }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white">
-          <q-card-section>
-            <div class="text-subtitle2">Soles a Yuanes</div>
-            <div class="text-h6 q-mt-sm">Tipo de cambio</div>
-            <div class="text-h4 text-primary q-mt-xs">{{ formatoTipoCambio(rates.cny) }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
+    <!-- CARGA DE MONEDAS -->
+    <div v-if="loadingMonedas" class="row justify-center q-pa-xl">
+      <q-spinner color="primary" size="45px" />
     </div>
 
-    <div class="q-mt-xl">
-      <q-card flat bordered class="bg-white">
-        <q-card-section class="row items-center justify-between">
-          <div>
-            <div class="text-subtitle2">Movimiento del tipo de cambio PEN → USD</div>
-            <div class="text-grey-7">Últimos {{ chartData.length }} días</div>
-          </div>
-          <div v-if="chartLoading">
-            <q-spinner-dots color="primary" size="30px" />
+    <template v-else>
+      <!-- CONVERSOR -->
+      <q-card flat bordered class="dashboard-card">
+        <q-card-section>
+          <div class="row items-center justify-between">
+            <div>
+              <div class="text-h6">Conversor de monedas</div>
+              <div class="text-grey-7">
+                Selecciona dos monedas distintas para consultar el tipo de cambio.
+              </div>
+            </div>
+
+            <q-chip v-if="ultimaActualizacion" color="blue-1" text-color="primary" icon="schedule">
+              Actualizado: {{ formatearFechaHora(ultimaActualizacion) }}
+            </q-chip>
           </div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-section>
-          <div class="q-mb-md chart-container">
+          <div class="row q-col-gutter-md">
+            <!-- MONEDA ORIGEN -->
+            <div class="col-12 col-md-5">
+              <q-select
+                outlined
+                v-model="monedaOrigenId"
+                :options="monedasOrigenOptions"
+                option-label="label"
+                option-value="id"
+                emit-value
+                map-options
+                label="Moneda de origen"
+                @update:model-value="alCambiarOrigen"
+              >
+                <template #prepend>
+                  <q-avatar v-if="monedaOrigen" size="28px">
+                    <img :src="monedaOrigen.rutaBandera" />
+                  </q-avatar>
+
+                  <q-icon v-else name="paid" />
+                </template>
+
+                <template #option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section avatar>
+                      <q-avatar size="32px">
+                        <img :src="scope.opt.bandera" />
+                      </q-avatar>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label> {{ scope.opt.codigo }} - {{ scope.opt.nombre }} </q-item-label>
+
+                      <q-item-label caption>
+                        {{ scope.opt.simbolo }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+
+            <!-- BOTÓN INVERTIR -->
+            <div class="col-12 col-md-2 column justify-center items-center">
+              <q-btn
+                round
+                outline
+                color="primary"
+                icon="swap_horiz"
+                :disable="!parValido || loadingTasa"
+                @click="invertirMonedas"
+              >
+                <q-tooltip>Invertir monedas</q-tooltip>
+              </q-btn>
+            </div>
+
+            <!-- MONEDA DESTINO -->
+            <div class="col-12 col-md-5">
+              <q-select
+                outlined
+                v-model="monedaDestinoId"
+                :options="monedasDestinoOptions"
+                option-label="label"
+                option-value="id"
+                emit-value
+                map-options
+                label="Moneda de destino"
+                @update:model-value="consultarTipoCambio"
+              >
+                <template #prepend>
+                  <q-avatar v-if="monedaDestino" size="28px">
+                    <img :src="monedaDestino.rutaBandera" />
+                  </q-avatar>
+
+                  <q-icon v-else name="currency_exchange" />
+                </template>
+
+                <template #option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section avatar>
+                      <q-avatar size="32px">
+                        <img :src="scope.opt.bandera" />
+                      </q-avatar>
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label> {{ scope.opt.codigo }} - {{ scope.opt.nombre }} </q-item-label>
+
+                      <q-item-label caption>
+                        {{ scope.opt.simbolo }}
+                      </q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+
+                <template #no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      No hay otra moneda activa disponible.
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+          </div>
+
+          <!-- AVISO MISMA MONEDA -->
+          <q-banner
+            v-if="monedaOrigenId && monedaDestinoId && monedaOrigenId === monedaDestinoId"
+            class="bg-red-1 text-negative q-mt-md rounded-borders"
+          >
+            La moneda de origen y destino no pueden ser iguales.
+          </q-banner>
+
+          <!-- MONTO -->
+          <div class="row q-col-gutter-md q-mt-md">
+            <div class="col-12 col-md-6">
+              <q-input
+                outlined
+                v-model.number="montoOrigen"
+                type="number"
+                min="0"
+                step="0.01"
+                label="Monto a convertir"
+                :disable="!parValido"
+              >
+                <template #prepend>
+                  <span class="text-primary text-weight-bold">
+                    {{ monedaOrigen?.simbolo || '' }}
+                  </span>
+                </template>
+
+                <template #append>
+                  <span class="text-caption text-weight-bold">
+                    {{ monedaOrigen?.codigoIso || '' }}
+                  </span>
+                </template>
+              </q-input>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <q-input
+                outlined
+                readonly
+                :model-value="montoConvertidoFormateado"
+                label="Monto aproximado a recibir"
+              >
+                <template #prepend>
+                  <span class="text-positive text-weight-bold">
+                    {{ monedaDestino?.simbolo || '' }}
+                  </span>
+                </template>
+
+                <template #append>
+                  <span class="text-caption text-weight-bold">
+                    {{ monedaDestino?.codigoIso || '' }}
+                  </span>
+                </template>
+              </q-input>
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+
+      <!-- TARJETA DE TASA -->
+      <div class="row q-col-gutter-md q-mt-md">
+        <div class="col-12 col-md-7">
+          <q-card flat bordered class="dashboard-card rate-card">
+            <q-card-section>
+              <div class="text-subtitle2 text-grey-7">Tipo de cambio referencial</div>
+
+              <div v-if="loadingTasa" class="q-py-lg text-center">
+                <q-spinner-dots color="primary" size="42px" />
+              </div>
+
+              <template v-else-if="parValido && tasaCambio > 0">
+                <div class="row items-center q-gutter-md q-mt-md">
+                  <q-avatar size="48px">
+                    <img :src="monedaOrigen?.rutaBandera" />
+                  </q-avatar>
+
+                  <div class="text-h4 text-primary">
+                    1 {{ monedaOrigen?.codigoIso }}
+                    =
+                    {{ formatoTipoCambio(tasaCambio) }}
+                    {{ monedaDestino?.codigoIso }}
+                  </div>
+
+                  <q-avatar size="48px">
+                    <img :src="monedaDestino?.rutaBandera" />
+                  </q-avatar>
+                </div>
+
+                <div class="text-grey-7 q-mt-md">
+                  {{ mensajeReferencia }}
+                </div>
+              </template>
+
+              <q-banner v-else class="bg-grey-2 text-grey-8 rounded-borders">
+                Selecciona un par de monedas para consultar su tasa.
+              </q-banner>
+            </q-card-section>
+          </q-card>
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="col-12 col-md-5">
+          <q-card flat bordered class="dashboard-card">
+            <q-card-section>
+              <div class="text-h6 q-mb-md">Resumen de conversión</div>
+
+              <q-list separator>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>Entregas</q-item-label>
+                    <q-item-label class="text-h6">
+                      {{ monedaOrigen?.simbolo || '' }}
+                      {{ montoOrigenValido.toFixed(2) }}
+                      {{ monedaOrigen?.codigoIso || '' }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>Recibirías aproximadamente</q-item-label>
+                    <q-item-label class="text-h6 text-positive">
+                      {{ monedaDestino?.simbolo || '' }}
+                      {{ montoConvertidoFormateado }}
+                      {{ monedaDestino?.codigoIso || '' }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item>
+                  <q-item-section>
+                    <q-item-label caption>Monedas activas disponibles</q-item-label>
+                    <q-item-label class="text-h6">
+                      {{ monedas.length }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+
+      <!-- GRÁFICO DE CONSULTAS DE LA SESIÓN -->
+      <q-card flat bordered class="dashboard-card q-mt-md">
+        <q-card-section class="row items-center justify-between">
+          <div>
+            <div class="text-h6">Seguimiento de tasa: {{ codigoPar }}</div>
+
+            <div class="text-grey-7">Consultas realizadas durante esta sesión</div>
+          </div>
+
+          <q-btn
+            flat
+            color="negative"
+            icon="delete_outline"
+            label="Limpiar"
+            :disable="historialSesion.length === 0"
+            @click="limpiarHistorial"
+          />
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <div v-if="historialSesion.length < 2" class="text-center text-grey-7 q-pa-xl">
+            Actualiza la tasa al menos dos veces para visualizar su evolución durante esta sesión.
+          </div>
+
+          <div v-else class="chart-container">
             <canvas
               ref="chartCanvas"
-              class="full-width chart-canvas"
+              class="chart-canvas"
               @mousemove="handleChartHover"
-              @mouseleave="handleChartLeave"
+              @mouseleave="hoveredPoint = null"
             />
 
             <div
               v-if="hoveredPoint"
               class="chart-crosshair"
               :style="{ left: `${hoveredPoint.x}px` }"
-            ></div>
+            />
 
             <div
               v-if="hoveredPoint"
               class="chart-tooltip"
               :style="{
                 left: `${hoveredPoint.x}px`,
-                top: `${hoveredPoint.y - 15}px`,
+                top: `${hoveredPoint.y - 12}px`,
               }"
             >
-              <div class="tooltip-date">{{ hoveredPoint.date }}</div>
-              <div class="tooltip-rate">USD: {{ formatoTipoCambio(hoveredPoint.rate) }}</div>
-            </div>
-          </div>
-          <div class="row q-col-gutter-lg q-mt-md simulator-section">
-            <div class="col-12 col-md-4">
-              <label class="text-subtitle2 text-grey-8">Moneda origen</label>
-              <q-input
-                v-model.number="simulatorData.pen"
-                type="number"
-                outlined
-                dense
-                class="q-mt-xs sim-input"
-                placeholder="0.00"
-                @update:model-value="calculateSimulator"
-              >
-                <template v-slot:append>
-                  <span class="text-primary text-subtitle2 text-weight-bold sim-append">PEN</span>
-                </template>
-              </q-input>
-            </div>
-
-            <div class="col-12 col-md-8">
-              <label class="text-subtitle2 text-grey-8">Moneda destino</label>
-              <div class="row q-col-gutter-md q-mt-none simulator-dest-row">
-                <div class="col-12 col-md-4">
-                  <q-input
-                    :model-value="simulatorData.usd"
-                    type="number"
-                    outlined
-                    dense
-                    readonly
-                    class="sim-input readonly-input"
-                  >
-                    <template v-slot:append>
-                      <span class="text-primary text-subtitle2 text-weight-bold sim-append"
-                        >USD</span
-                      >
-                    </template>
-                  </q-input>
-                </div>
-                <div class="col-12 col-md-4">
-                  <q-input
-                    :model-value="simulatorData.eur"
-                    type="number"
-                    outlined
-                    dense
-                    readonly
-                    class="sim-input readonly-input"
-                  >
-                    <template v-slot:append>
-                      <span class="text-primary text-subtitle2 text-weight-bold sim-append"
-                        >EUR</span
-                      >
-                    </template>
-                  </q-input>
-                </div>
-                <div class="col-12 col-md-4">
-                  <q-input
-                    :model-value="simulatorData.cny"
-                    type="number"
-                    outlined
-                    dense
-                    readonly
-                    class="sim-input readonly-input"
-                  >
-                    <template v-slot:append>
-                      <span class="text-primary text-subtitle2 text-weight-bold sim-append"
-                        >CNY</span
-                      >
-                    </template>
-                  </q-input>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="q-mt-md text-center">
-            <div class="row q-col-gutter-sm">
-              <div class="col-12 col-md-4">
-                <div class="text-grey-7">1 PEN = {{ formatoTipoCambio(rates.usd) }} USD</div>
-              </div>
-              <div class="col-12 col-md-4">
-                <div class="text-grey-7">1 PEN = {{ formatoTipoCambio(rates.eur) }} EUR</div>
-              </div>
-              <div class="col-12 col-md-4">
-                <div class="text-grey-7">1 PEN = {{ formatoTipoCambio(rates.cny) }} CNY</div>
-              </div>
+              <div>{{ hoveredPoint.fecha }}</div>
+              <strong>
+                {{ formatoTipoCambio(hoveredPoint.tasa) }}
+                {{ monedaDestino?.codigoIso }}
+              </strong>
             </div>
           </div>
         </q-card-section>
       </q-card>
-    </div>
+    </template>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
-import { fetchExchangeRates, fetchUsdRateHistory } from 'src/services/exchange.service'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
+import { obtenerMonedasActivas } from 'src/services/monedas.service'
+import { obtenerTipoCambioEnVivo } from 'src/services/exchange.service'
 
 const userName = localStorage.getItem('userName') || 'Usuario'
-const rates = ref({ usd: 3.5, eur: 3.88, cny: 0.5 })
-const chartData = ref([])
-const loading = ref(false)
-const chartLoading = ref(false)
-const chartError = ref('')
+
+const monedas = ref([])
+const monedaOrigenId = ref(null)
+const monedaDestinoId = ref(null)
+const montoOrigen = ref(100)
+
+const tasaCambio = ref(0)
+const mensajeReferencia = ref('')
+const ultimaActualizacion = ref(null)
+
+const loadingMonedas = ref(false)
+const loadingTasa = ref(false)
+const errorMessage = ref('')
+
+const historialSesion = ref([])
 const chartCanvas = ref(null)
-const simulatorData = ref({ pen: 100, usd: 0, eur: 0, cny: 0 })
-
-watch(
-  () => rates.value,
-  () => {
-    calculateSimulator()
-  },
-  { deep: true },
-)
-
-const calculateSimulator = () => {
-  const pen = Number(simulatorData.value.pen) || 0
-  if (pen <= 0) {
-    simulatorData.value.usd = 0
-    simulatorData.value.eur = 0
-    simulatorData.value.cny = 0
-    return
-  }
-
-  // Las tasas son unidades de moneda destino por 1 PEN (p. ej. 1 PEN = 0.26 USD)
-  simulatorData.value.usd = rates.value.usd ? Number((pen / rates.value.usd).toFixed(2)) : 0
-  simulatorData.value.eur = rates.value.eur ? Number((pen / rates.value.eur).toFixed(2)) : 0
-  simulatorData.value.cny = rates.value.cny ? Number((pen / rates.value.cny).toFixed(2)) : 0
-}
-
 const hoveredPoint = ref(null)
 
-const handleChartLeave = () => {
-  hoveredPoint.value = null
+const monedasOrigenOptions = computed(() =>
+  monedas.value.map((moneda) => ({
+    id: moneda.id,
+    codigo: moneda.codigoIso,
+    nombre: moneda.nombre,
+    simbolo: moneda.simbolo,
+    bandera: moneda.rutaBandera,
+    label: `${moneda.codigoIso} - ${moneda.nombre}`,
+  })),
+)
+
+const monedasDestinoOptions = computed(() =>
+  monedas.value
+    .filter((moneda) => moneda.id !== monedaOrigenId.value)
+    .map((moneda) => ({
+      id: moneda.id,
+      codigo: moneda.codigoIso,
+      nombre: moneda.nombre,
+      simbolo: moneda.simbolo,
+      bandera: moneda.rutaBandera,
+      label: `${moneda.codigoIso} - ${moneda.nombre}`,
+    })),
+)
+
+const monedaOrigen = computed(() =>
+  monedas.value.find((moneda) => moneda.id === monedaOrigenId.value),
+)
+
+const monedaDestino = computed(() =>
+  monedas.value.find((moneda) => moneda.id === monedaDestinoId.value),
+)
+
+const parValido = computed(() => {
+  return monedaOrigen.value && monedaDestino.value && monedaOrigenId.value !== monedaDestinoId.value
+})
+
+const montoOrigenValido = computed(() => {
+  const monto = Number(montoOrigen.value)
+  return Number.isFinite(monto) && monto > 0 ? monto : 0
+})
+
+const montoConvertido = computed(() => {
+  if (!parValido.value || tasaCambio.value <= 0) return 0
+
+  return montoOrigenValido.value * Number(tasaCambio.value)
+})
+
+const montoConvertidoFormateado = computed(() => montoConvertido.value.toFixed(2))
+
+const codigoPar = computed(() => {
+  if (!monedaOrigen.value || !monedaDestino.value) return '-'
+
+  return `${monedaOrigen.value.codigoIso} → ${monedaDestino.value.codigoIso}`
+})
+
+const cargarMonedas = async () => {
+  try {
+    loadingMonedas.value = true
+    errorMessage.value = ''
+
+    monedas.value = await obtenerMonedasActivas()
+
+    if (monedas.value.length >= 2) {
+      monedaOrigenId.value = monedas.value[0].id
+      monedaDestinoId.value = monedas.value[1].id
+
+      await consultarTipoCambio()
+    } else {
+      errorMessage.value = 'Se necesitan al menos dos monedas activas para realizar conversiones.'
+    }
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = 'No se pudieron cargar las monedas activas.'
+  } finally {
+    loadingMonedas.value = false
+  }
 }
 
-const handleChartHover = (event) => {
+const alCambiarOrigen = async () => {
+  if (monedaDestinoId.value === monedaOrigenId.value) {
+    const primeraDisponible = monedas.value.find((moneda) => moneda.id !== monedaOrigenId.value)
+
+    monedaDestinoId.value = primeraDisponible?.id ?? null
+  }
+
+  historialSesion.value = []
+
+  await consultarTipoCambio()
+}
+
+const consultarTipoCambio = async () => {
+  if (!parValido.value || loadingTasa.value) return
+
+  try {
+    loadingTasa.value = true
+    errorMessage.value = ''
+
+    const response = await obtenerTipoCambioEnVivo(
+      monedaOrigen.value.codigoIso,
+      monedaDestino.value.codigoIso,
+    )
+
+    tasaCambio.value = Number(response.tasaCambioReferencial || 0)
+    mensajeReferencia.value =
+      response.mensaje ||
+      `1 ${monedaOrigen.value.codigoIso} equivale a ${tasaCambio.value} ${monedaDestino.value.codigoIso}`
+
+    ultimaActualizacion.value = response.fechaActualizacion || new Date().toISOString()
+
+    agregarPuntoHistorial()
+  } catch (error) {
+    console.error(error)
+
+    tasaCambio.value = 0
+    mensajeReferencia.value = ''
+
+    errorMessage.value =
+      error.response?.data?.message ||
+      'No se pudo consultar el tipo de cambio para el par seleccionado.'
+  } finally {
+    loadingTasa.value = false
+  }
+}
+
+const agregarPuntoHistorial = () => {
+  const ahora = new Date()
+
+  historialSesion.value.push({
+    fecha: ahora.toLocaleTimeString('es-PE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }),
+    tasa: Number(tasaCambio.value),
+  })
+
+  if (historialSesion.value.length > 20) {
+    historialSesion.value.shift()
+  }
+
+  nextTick(drawChart)
+}
+
+const invertirMonedas = async () => {
+  const origenAnterior = monedaOrigenId.value
+
+  monedaOrigenId.value = monedaDestinoId.value
+  monedaDestinoId.value = origenAnterior
+
+  historialSesion.value = []
+
+  await consultarTipoCambio()
+}
+
+const limpiarHistorial = () => {
+  historialSesion.value = []
+  hoveredPoint.value = null
+
   const canvas = chartCanvas.value
-  if (!canvas || chartData.value.length === 0) return
 
-  // Obtener posición del ratón relativa al Canvas
-  const rect = canvas.getBoundingClientRect()
-  const mouseX = event.clientX - rect.left
-
-  // Mismos paddings que usas para dibujar
-  const padding = { top: 30, right: 24, bottom: 40, left: 56 }
-  const width = canvas.width / (window.devicePixelRatio || 1)
-  const height = canvas.height / (window.devicePixelRatio || 1)
-  const plotWidth = width - padding.left - padding.right
-  const plotHeight = height - padding.top - padding.bottom
-
-  // Solo interactuar si el ratón está dentro del área de dibujo
-  if (mouseX >= padding.left && mouseX <= width - padding.right) {
-    const relativeX = mouseX - padding.left
-
-    // Encontrar el índice del dato más cercano
-    let pointIndex = Math.round((relativeX / plotWidth) * (chartData.value.length - 1))
-    pointIndex = Math.max(0, Math.min(pointIndex, chartData.value.length - 1)) // Asegurar límites
-
-    const point = chartData.value[pointIndex]
-
-    // Calcular la posición X e Y exacta en el Canvas (Efecto imán)
-    const values = chartData.value.map((item) => item.rate)
-    const minValue = Math.min(...values)
-    const maxValue = Math.max(...values)
-    const valueRange = maxValue - minValue || 1
-
-    const exactX = padding.left + (plotWidth * pointIndex) / Math.max(chartData.value.length - 1, 1)
-    const exactY = padding.top + ((maxValue - point.rate) / valueRange) * plotHeight
-
-    hoveredPoint.value = {
-      date: point.date,
-      rate: point.rate,
-      x: exactX,
-      y: exactY,
-    }
-  } else {
-    hoveredPoint.value = null
+  if (canvas) {
+    const context = canvas.getContext('2d')
+    context?.clearRect(0, 0, canvas.width, canvas.height)
   }
 }
 
 const formatoTipoCambio = (value) => {
-  return value ? value.toFixed(4) : '-'
+  const numero = Number(value)
+
+  if (!Number.isFinite(numero) || numero <= 0) return '-'
+
+  return numero.toLocaleString('es-PE', {
+    minimumFractionDigits: 4,
+    maximumFractionDigits: 6,
+  })
+}
+
+const formatearFechaHora = (fecha) => {
+  if (!fecha) return '-'
+
+  return new Date(fecha).toLocaleString('es-PE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 const drawChart = () => {
   const canvas = chartCanvas.value
-  if (!canvas || chartData.value.length === 0) {
-    return
-  }
 
-  const ctx = canvas.getContext('2d')
+  if (!canvas || historialSesion.value.length < 2) return
+
+  const containerWidth = canvas.parentElement?.clientWidth || 900
+  const width = Math.max(containerWidth, 500)
+  const height = 320
   const dpr = window.devicePixelRatio || 1
-  const width = 1100
-  const height = 360
 
   canvas.width = width * dpr
   canvas.height = height * dpr
   canvas.style.width = `${width}px`
   canvas.style.height = `${height}px`
+
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) return
+
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   ctx.clearRect(0, 0, width, height)
 
-  const padding = { top: 30, right: 24, bottom: 40, left: 56 }
+  const padding = {
+    top: 28,
+    right: 24,
+    bottom: 44,
+    left: 70,
+  }
+
   const plotWidth = width - padding.left - padding.right
   const plotHeight = height - padding.top - padding.bottom
 
-  const values = chartData.value.map((item) => item.rate)
-  const minValue = Math.min(...values)
-  const maxValue = Math.max(...values)
-  const valueRange = maxValue - minValue || 1
-  const gridLines = 6
+  const valores = historialSesion.value.map((punto) => punto.tasa)
+  const minimoOriginal = Math.min(...valores)
+  const maximoOriginal = Math.max(...valores)
 
-  // Dibujar líneas de grid
-  ctx.font = '12px Inter, sans-serif'
+  const margen = Math.max(
+    (maximoOriginal - minimoOriginal) * 0.15,
+    maximoOriginal * 0.002,
+    0.000001,
+  )
+
+  const minimo = minimoOriginal - margen
+  const maximo = maximoOriginal + margen
+  const rango = maximo - minimo || 1
+
+  ctx.font = '12px Arial'
+  ctx.strokeStyle = '#e0e0e0'
+  ctx.fillStyle = '#757575'
   ctx.lineWidth = 1
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
-  ctx.fillStyle = '#9aa4b5'
 
-  for (let i = 0; i <= gridLines; i += 1) {
-    const y = padding.top + (plotHeight / gridLines) * i
+  const lineas = 5
+
+  for (let i = 0; i <= lineas; i += 1) {
+    const y = padding.top + (plotHeight / lineas) * i
+
     ctx.beginPath()
     ctx.moveTo(padding.left, y)
     ctx.lineTo(width - padding.right, y)
     ctx.stroke()
 
-    const valueLabel = (maxValue - (valueRange / gridLines) * i).toFixed(4)
-    ctx.fillText(valueLabel, 8, y + 4)
+    const valor = maximo - (rango / lineas) * i
+
+    ctx.textAlign = 'right'
+    ctx.fillText(valor.toFixed(6), padding.left - 8, y + 4)
   }
 
-  // Dibujar ejes
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)'
-  ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.moveTo(padding.left, padding.top)
-  ctx.lineTo(padding.left, height - padding.bottom)
-  ctx.lineTo(width - padding.right, height - padding.bottom)
-  ctx.stroke()
+  const puntos = historialSesion.value.map((item, index) => {
+    const x = padding.left + (plotWidth * index) / Math.max(historialSesion.value.length - 1, 1)
 
-  // Calcular puntos para la curva suave (Catmull-Rom spline)
-  const points = chartData.value.map((item, index) => {
-    const x = padding.left + (plotWidth * index) / Math.max(chartData.value.length - 1, 1)
-    const y = padding.top + ((maxValue - item.rate) / valueRange) * plotHeight
-    return { x, y }
+    const y = padding.top + ((maximo - item.tasa) / rango) * plotHeight
+
+    return {
+      ...item,
+      x,
+      y,
+    }
   })
 
-  // Dibujar curva suave usando quadraticCurve
-  ctx.strokeStyle = '#f0b90b'
-  ctx.lineWidth = 2.5
+  ctx.strokeStyle = '#1976d2'
+  ctx.lineWidth = 3
   ctx.beginPath()
-  ctx.moveTo(points[0].x, points[0].y)
+  ctx.moveTo(puntos[0].x, puntos[0].y)
 
-  for (let i = 1; i < points.length; i++) {
-    const xc = (points[i].x + points[i - 1].x) / 2
-    const yc = (points[i].y + points[i - 1].y) / 2
-    ctx.quadraticCurveTo(points[i - 1].x, points[i - 1].y, xc, yc)
+  for (let index = 1; index < puntos.length; index += 1) {
+    ctx.lineTo(puntos[index].x, puntos[index].y)
   }
-  ctx.quadraticCurveTo(
-    points[points.length - 1].x,
-    points[points.length - 1].y,
-    points[points.length - 1].x,
-    points[points.length - 1].y,
-  )
+
   ctx.stroke()
 
-  // Dibujar área bajo la curva
-  ctx.fillStyle = 'rgba(240, 185, 11, 0.18)'
-  ctx.beginPath()
-  ctx.moveTo(points[0].x, points[0].y)
+  ctx.fillStyle = '#1976d2'
 
-  for (let i = 1; i < points.length; i++) {
-    const xc = (points[i].x + points[i - 1].x) / 2
-    const yc = (points[i].y + points[i - 1].y) / 2
-    ctx.quadraticCurveTo(points[i - 1].x, points[i - 1].y, xc, yc)
-  }
-  ctx.quadraticCurveTo(
-    points[points.length - 1].x,
-    points[points.length - 1].y,
-    points[points.length - 1].x,
-    points[points.length - 1].y,
-  )
-  ctx.lineTo(width - padding.right, height - padding.bottom)
-  ctx.lineTo(padding.left, height - padding.bottom)
-  ctx.closePath()
-  ctx.fill()
-
-  // Dibujar puntos en cada dato
-  ctx.fillStyle = '#f0b90b'
-  points.forEach((point) => {
+  puntos.forEach((punto) => {
     ctx.beginPath()
-    ctx.arc(point.x, point.y, 3, 0, Math.PI * 2)
+    ctx.arc(punto.x, punto.y, 4, 0, Math.PI * 2)
     ctx.fill()
   })
 
-  // Dibujar etiquetas de fechas
-  ctx.fillStyle = '#9aa4b5'
+  ctx.fillStyle = '#757575'
   ctx.textAlign = 'center'
 
-  const labelStep = Math.max(1, Math.floor(chartData.value.length / 6))
-  chartData.value.forEach((item, index) => {
-    if (index % labelStep !== 0 && index !== chartData.value.length - 1) {
-      return
+  const salto = Math.max(1, Math.ceil(puntos.length / 6))
+
+  puntos.forEach((punto, index) => {
+    if (index % salto === 0 || index === puntos.length - 1) {
+      ctx.fillText(punto.fecha.slice(0, 5), punto.x, height - padding.bottom + 20)
     }
-    const x = padding.left + (plotWidth * index) / Math.max(chartData.value.length - 1, 1)
-    const y = height - padding.bottom + 18
-    ctx.fillText(item.date.slice(5), x, y)
   })
 }
 
-const loadExchangeData = async () => {
-  try {
-    loading.value = true
-    chartLoading.value = true
-    chartError.value = ''
+const handleChartHover = (event) => {
+  const canvas = chartCanvas.value
 
-    const [latestRates, usdHistory] = await Promise.all([
-      fetchExchangeRates(),
-      fetchUsdRateHistory(30),
-    ])
+  if (!canvas || historialSesion.value.length < 2) return
 
-    rates.value = latestRates
-    chartData.value = usdHistory
-    await nextTick()
-    drawChart()
-  } catch (error) {
-    chartError.value = 'No se pudo cargar la información del tipo de cambio.'
-    console.error(error)
-  } finally {
-    loading.value = false
-    chartLoading.value = false
+  const rect = canvas.getBoundingClientRect()
+  const mouseX = event.clientX - rect.left
+
+  const width = rect.width
+
+  const padding = {
+    left: 70,
+    right: 24,
+  }
+
+  const plotWidth = width - padding.left - padding.right
+
+  if (mouseX < padding.left || mouseX > width - padding.right) {
+    hoveredPoint.value = null
+    return
+  }
+
+  const indice = Math.round(
+    ((mouseX - padding.left) / plotWidth) * (historialSesion.value.length - 1),
+  )
+
+  const indiceSeguro = Math.max(0, Math.min(indice, historialSesion.value.length - 1))
+
+  const valores = historialSesion.value.map((punto) => punto.tasa)
+  const minimoOriginal = Math.min(...valores)
+  const maximoOriginal = Math.max(...valores)
+
+  const margen = Math.max(
+    (maximoOriginal - minimoOriginal) * 0.15,
+    maximoOriginal * 0.002,
+    0.000001,
+  )
+
+  const minimo = minimoOriginal - margen
+  const maximo = maximoOriginal + margen
+  const rango = maximo - minimo || 1
+
+  const plotHeight = 320 - 28 - 44
+  const punto = historialSesion.value[indiceSeguro]
+
+  const x =
+    padding.left + (plotWidth * indiceSeguro) / Math.max(historialSesion.value.length - 1, 1)
+
+  const y = 28 + ((maximo - punto.tasa) / rango) * plotHeight
+
+  hoveredPoint.value = {
+    ...punto,
+    x,
+    y,
   }
 }
 
-onMounted(loadExchangeData)
+const redibujarAlCambiarTamano = () => {
+  nextTick(drawChart)
+}
+
+watch(
+  () => monedaDestinoId.value,
+  async (nuevoDestino, destinoAnterior) => {
+    if (!nuevoDestino || nuevoDestino === destinoAnterior) return
+
+    historialSesion.value = []
+
+    await consultarTipoCambio()
+  },
+)
+
+watch(
+  () => historialSesion.value.length,
+  () => {
+    nextTick(drawChart)
+  },
+)
+
+onMounted(async () => {
+  window.addEventListener('resize', redibujarAlCambiarTamano)
+  await cargarMonedas()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', redibujarAlCambiarTamano)
+})
 </script>
 
 <style scoped>
-.chart-canvas {
-  width: 100%;
-  max-width: 100%;
-  min-height: 360px;
-  cursor: crosshair;
+.dashboard-card {
+  border-radius: 18px;
+}
+
+.rate-card {
+  min-height: 210px;
 }
 
 .chart-container {
   position: relative;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .chart-canvas {
+  display: block;
   width: 100%;
-  max-width: 100%;
-  min-height: 360px;
+  min-height: 320px;
   cursor: crosshair;
 }
 
 .chart-crosshair {
   position: absolute;
-  top: 30px;
-  bottom: 40px;
+  top: 28px;
+  bottom: 44px;
   width: 1px;
-  background-color: rgba(240, 185, 11, 0.35);
+  background: rgba(25, 118, 210, 0.45);
   pointer-events: none;
-  z-index: 10;
   transform: translateX(-50%);
 }
 
 .chart-tooltip {
   position: absolute;
-  background-color: rgba(9, 12, 22, 0.96);
-  color: #e5e8ee;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  pointer-events: none;
-  z-index: 1000;
-  white-space: nowrap;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
   transform: translate(-50%, -100%);
-  transition:
-    top 0.1s ease,
-    left 0.1s ease;
-}
-
-.tooltip-date {
-  font-weight: 500;
-  margin-bottom: 4px;
-  font-size: 11px;
-  color: #9aa4b5;
-}
-
-.tooltip-rate {
-  color: #f0b90b;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.chart-legend {
-  color: #c8d1e0;
-}
-
-.chart-legend span {
-  color: #9aa4b5;
+  background: rgba(33, 33, 33, 0.95);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
 }
 </style>
