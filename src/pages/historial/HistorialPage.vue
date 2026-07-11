@@ -1,7 +1,6 @@
 <template>
   <q-page class="historial-page q-pa-lg">
     <div class="text-h4 text-yellow q-mb-sm">Historial</div>
-
     <div class="text-grey-7 q-mb-lg">Consulta tus movimientos de fondos y operaciones P2P.</div>
 
     <q-tabs
@@ -18,9 +17,11 @@
 
     <q-separator class="q-mb-md" />
 
-    <q-tab-panels v-model="tab" animated>
+    <q-tab-panels v-model="tab" animated class="historial-panels">
       <q-tab-panel name="movimientos" class="q-pa-none">
-        <q-spinner v-if="loadingMovimientos" color="primary" size="40px" />
+        <div v-if="loadingMovimientos" class="row justify-center q-pa-xl">
+          <q-spinner color="yellow" size="40px" />
+        </div>
 
         <q-table
           v-else
@@ -44,17 +45,25 @@
           <template #body-cell-monto="props">
             <q-td :props="props">
               {{ props.row.monedaSimbolo }}
-              {{ Number(props.row.monto).toFixed(2) }}
+              {{ Number(props.row.monto || 0).toFixed(2) }}
               {{ props.row.monedaCodigo }}
             </q-td>
           </template>
 
           <template #body-cell-estado="props">
             <q-td :props="props">
-              <q-chip :color="colorEstadoMovimiento(props.row.estado)" text-color="white">
+              <q-chip :color="colorEstadoMovimiento(props.row.estado)" text-color="white" dense>
                 {{ props.row.estado }}
               </q-chip>
             </q-td>
+          </template>
+
+          <template #body-cell-fechaSolicitud="props">
+            <q-td :props="props">{{ formatearFecha(props.row.fechaSolicitud) }}</q-td>
+          </template>
+
+          <template #body-cell-fechaProcesado="props">
+            <q-td :props="props">{{ formatearFecha(props.row.fechaProcesado) }}</q-td>
           </template>
 
           <template #body-cell-rutaVoucher="props">
@@ -63,36 +72,22 @@
                 v-if="props.row.rutaVoucher"
                 flat
                 round
-                color="primary"
+                color="yellow"
                 icon="image"
                 @click="verVoucher(props.row)"
-              />
-              <span v-else>-</span>
-            </q-td>
-          </template>
-
-          <template #body-cell-fechaSolicitud="props">
-            <q-td :props="props">
-              <div class="fecha-hora-cell">
-                <div>{{ formatearFecha(props.row.fechaSolicitud) }}</div>
-                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaSolicitud) }}</div>
-              </div>
-            </q-td>
-          </template>
-
-          <template #body-cell-fechaProcesado="props">
-            <q-td :props="props">
-              <div class="fecha-hora-cell">
-                <div>{{ formatearFecha(props.row.fechaProcesado) }}</div>
-                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaProcesado) }}</div>
-              </div>
+              >
+                <q-tooltip>Ver voucher</q-tooltip>
+              </q-btn>
+              <span v-else class="text-grey-6">No aplica</span>
             </q-td>
           </template>
         </q-table>
       </q-tab-panel>
 
       <q-tab-panel name="p2p" class="q-pa-none">
-        <q-spinner v-if="loadingP2P" color="primary" size="40px" />
+        <div v-if="loadingP2P" class="row justify-center q-pa-xl">
+          <q-spinner color="yellow" size="40px" />
+        </div>
 
         <q-table
           v-else
@@ -113,6 +108,12 @@
             </q-td>
           </template>
 
+          <template #body-cell-creadorNombre="props">
+            <q-td :props="props">
+              <div class="text-weight-medium">{{ props.row.creadorNombre || '-' }}</div>
+            </q-td>
+          </template>
+
           <template #body-cell-operacion="props">
             <q-td :props="props">
               {{ props.row.monedaOrigenCodigo }} → {{ props.row.monedaDestinoCodigo }}
@@ -122,40 +123,63 @@
           <template #body-cell-montoOrigen="props">
             <q-td :props="props">
               {{ props.row.monedaOrigenSimbolo }}
-              {{ Number(props.row.montoOrigen).toFixed(2) }}
+              {{ Number(props.row.montoOrigen || 0).toFixed(2) }}
+              {{ props.row.monedaOrigenCodigo }}
             </q-td>
           </template>
 
           <template #body-cell-montoDestino="props">
             <q-td :props="props">
               {{ props.row.monedaDestinoSimbolo }}
-              {{ Number(props.row.montoDestino).toFixed(2) }}
+              {{ Number(props.row.montoDestino || 0).toFixed(2) }}
+              {{ props.row.monedaDestinoCodigo }}
             </q-td>
+          </template>
+
+          <template #body-cell-tasaCambio="props">
+            <q-td :props="props">{{ Number(props.row.tasaCambio || 0).toFixed(4) }}</q-td>
           </template>
 
           <template #body-cell-estado="props">
             <q-td :props="props">
-              <q-chip :color="colorEstadoP2P(props.row.estado)" text-color="white">
+              <q-chip :color="colorEstadoP2P(props.row.estado)" text-color="white" dense>
                 {{ props.row.estado }}
               </q-chip>
             </q-td>
           </template>
 
           <template #body-cell-fechaPublicacion="props">
-            <q-td :props="props">
-              <div class="fecha-hora-cell">
-                <div>{{ formatearFecha(props.row.fechaPublicacion) }}</div>
-                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaPublicacion) }}</div>
-              </div>
-            </q-td>
+            <q-td :props="props">{{ formatearFecha(props.row.fechaPublicacion) }}</q-td>
           </template>
 
           <template #body-cell-fechaTransaccion="props">
+            <q-td :props="props">{{ formatearFecha(props.row.fechaTransaccion) }}</q-td>
+          </template>
+
+          <template #body-cell-calificacion="props">
             <q-td :props="props">
-              <div class="fecha-hora-cell">
-                <div>{{ formatearFecha(props.row.fechaTransaccion) }}</div>
-                <div class="text-grey-7 text-caption">{{ formatearHora(props.row.fechaTransaccion) }}</div>
+              <q-btn
+                v-if="props.row.puedeCalificar"
+                color="amber-8"
+                text-color="black"
+                icon="star"
+                label="Calificar"
+                dense
+                @click="abrirCalificacion(props.row)"
+              />
+
+              <div v-else-if="props.row.yaCalifico" class="column items-center">
+                <q-rating
+                  readonly
+                  color="amber"
+                  :model-value="Number(props.row.calificacionDada || 0)"
+                  :max="5"
+                  size="18px"
+                />
+                <span class="text-caption text-grey-6">Ya calificaste</span>
               </div>
+
+              <span v-else class="text-grey-6">No disponible</span>
             </q-td>
           </template>
         </q-table>
@@ -170,21 +194,121 @@
           <q-btn flat round dense icon="close" v-close-popup />
         </q-card-section>
 
+        <q-separator />
+
         <q-card-section>
-          <img :src="voucherSeleccionado" class="voucher-image" />
+          <img
+            v-if="voucherSeleccionado && !voucherError"
+            :src="voucherSeleccionado"
+            class="voucher-image"
+            @error="voucherError = true"
+          />
+
+          <q-banner v-if="voucherError" class="bg-red-1 text-negative rounded-borders">
+            No se pudo encontrar el archivo del voucher.
+          </q-banner>
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <q-dialog v-model="dialogCalificacion" persistent>
+      <q-card class="calificacion-card">
+        <q-card-section class="row items-center">
+          <div>
+            <div class="text-h6">Calificar ofertante</div>
+            <div class="text-grey-6">
+              {{ operacionSeleccionada?.creadorNombre || 'Usuario' }}
+            </div>
+          </div>
+
+          <q-space />
+
+          <q-btn
+            flat
+            round
+            dense
+            icon="close"
+            :disable="guardandoCalificacion"
+            @click="cerrarCalificacion"
+          />
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section class="text-center">
+          <div class="text-subtitle2 q-mb-md">¿Cómo fue tu experiencia con este usuario?</div>
+
+          <q-rating
+            v-model="formCalificacion.puntuacion"
+            color="amber"
+            icon="star_border"
+            icon-selected="star"
+            :max="5"
+            size="42px"
+          />
+
+          <div class="text-grey-6 q-mt-sm">{{ textoPuntuacion }}</div>
+
+          <q-input
+            v-model.trim="formCalificacion.comentario"
+            outlined
+            type="textarea"
+            label="Comentario opcional"
+            maxlength="300"
+            counter
+            autogrow
+            class="q-mt-lg"
+          />
+
+          <q-banner v-if="errorCalificacion" class="bg-red-1 text-negative q-mt-md rounded-borders">
+            {{ errorCalificacion }}
+          </q-banner>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            color="grey-5"
+            label="Cancelar"
+            :disable="guardandoCalificacion"
+            @click="cerrarCalificacion"
+          />
+
+          <q-btn
+            color="amber-8"
+            text-color="black"
+            icon="send"
+            label="Enviar calificación"
+            :loading="guardandoCalificacion"
+            :disable="formCalificacion.puntuacion < 1"
+            @click="guardarCalificacion"
+          >
+            <q-tooltip v-if="formCalificacion.puntuacion < 1">
+              Selecciona al menos una estrella.
+            </q-tooltip>
+          </q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-banner v-if="message" class="bg-green-1 text-positive q-mt-md rounded-borders">
+      {{ message }}
+    </q-banner>
+
+    <q-banner v-if="errorMessage" class="bg-red-1 text-negative q-mt-md rounded-borders">
+      {{ errorMessage }}
+    </q-banner>
   </q-page>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { obtenerMovimientosPorUsuario } from 'src/services/movimientos.service'
 import { obtenerHistorialP2P } from 'src/services/ofertas.service'
+import { calificarOperacion } from 'src/services/calificaciones.service'
 
 const tab = ref('movimientos')
-const usuarioId = localStorage.getItem('userId')
+const usuarioId = Number(localStorage.getItem('userId'))
 
 const movimientos = ref([])
 const operacionesP2P = ref([])
@@ -192,8 +316,22 @@ const operacionesP2P = ref([])
 const loadingMovimientos = ref(false)
 const loadingP2P = ref(false)
 
+const errorMessage = ref('')
+const message = ref('')
+
 const dialogVoucher = ref(false)
 const voucherSeleccionado = ref('')
+const voucherError = ref(false)
+
+const dialogCalificacion = ref(false)
+const guardandoCalificacion = ref(false)
+const operacionSeleccionada = ref(null)
+const errorCalificacion = ref('')
+
+const formCalificacion = ref({
+  puntuacion: 0,
+  comentario: '',
+})
 
 const apiBaseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || ''
 
@@ -209,6 +347,7 @@ const columnsMovimientos = [
 
 const columnsP2P = [
   { name: 'rolUsuario', label: 'Rol', field: 'rolUsuario', align: 'center' },
+  { name: 'creadorNombre', label: 'Ofertante', field: 'creadorNombre', align: 'left' },
   { name: 'operacion', label: 'Operación', field: 'operacion', align: 'center' },
   { name: 'montoOrigen', label: 'Monto origen', field: 'montoOrigen', align: 'right' },
   { name: 'montoDestino', label: 'Monto destino', field: 'montoDestino', align: 'right' },
@@ -226,12 +365,30 @@ const columnsP2P = [
     field: 'fechaTransaccion',
     align: 'center',
   },
+  { name: 'calificacion', label: 'Calificación', field: 'calificacion', align: 'center' },
 ]
+
+const textoPuntuacion = computed(() => {
+  const textos = {
+    0: 'Selecciona una puntuación',
+    1: 'Muy mala experiencia',
+    2: 'Mala experiencia',
+    3: 'Experiencia regular',
+    4: 'Buena experiencia',
+    5: 'Excelente experiencia',
+  }
+
+  return textos[formCalificacion.value.puntuacion] || ''
+})
 
 const cargarMovimientos = async () => {
   try {
     loadingMovimientos.value = true
+    errorMessage.value = ''
     movimientos.value = await obtenerMovimientosPorUsuario(usuarioId)
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = error.response?.data?.message || 'No se pudieron cargar los movimientos.'
   } finally {
     loadingMovimientos.value = false
   }
@@ -240,7 +397,11 @@ const cargarMovimientos = async () => {
 const cargarHistorialP2P = async () => {
   try {
     loadingP2P.value = true
+    errorMessage.value = ''
     operacionesP2P.value = await obtenerHistorialP2P(usuarioId)
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = error.response?.data?.message || 'No se pudo cargar el historial P2P.'
   } finally {
     loadingP2P.value = false
   }
@@ -255,37 +416,90 @@ const colorEstadoMovimiento = (estado) => {
 const colorEstadoP2P = (estado) => {
   if (estado === 'COMPLETADO') return 'positive'
   if (estado === 'CANCELADO') return 'negative'
+  if (estado === 'DISPONIBLE') return 'primary'
   return 'orange'
 }
 
-const formatearFecha = (valor) => {
-  if (!valor) return '-'
+const formatearFecha = (fecha) => {
+  if (!fecha) return '-'
 
-  const fecha = new Date(valor)
-  if (Number.isNaN(fecha.getTime())) return valor
-
-  return fecha.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
+  return new Date(fecha).toLocaleString('es-PE', {
     year: 'numeric',
-  })
-}
-
-const formatearHora = (valor) => {
-  if (!valor) return '-'
-
-  const fecha = new Date(valor)
-  if (Number.isNaN(fecha.getTime())) return valor
-
-  return fecha.toLocaleTimeString('es-ES', {
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
 const verVoucher = (movimiento) => {
-  voucherSeleccionado.value = `${apiBaseUrl}${movimiento.rutaVoucher}`
+  voucherError.value = false
+  const ruta = movimiento.rutaVoucher
+
+  if (!ruta) {
+    voucherSeleccionado.value = ''
+    voucherError.value = true
+    dialogVoucher.value = true
+    return
+  }
+
+  voucherSeleccionado.value = ruta.startsWith('http') ? ruta : `${apiBaseUrl}${ruta}`
+
   dialogVoucher.value = true
+}
+
+const abrirCalificacion = (operacion) => {
+  operacionSeleccionada.value = operacion
+  formCalificacion.value = {
+    puntuacion: 0,
+    comentario: '',
+  }
+  errorCalificacion.value = ''
+  message.value = ''
+  dialogCalificacion.value = true
+}
+
+const cerrarCalificacion = () => {
+  if (guardandoCalificacion.value) return
+
+  dialogCalificacion.value = false
+  operacionSeleccionada.value = null
+  errorCalificacion.value = ''
+}
+
+const guardarCalificacion = async () => {
+  if (!operacionSeleccionada.value) return
+
+  if (formCalificacion.value.puntuacion < 1) {
+    errorCalificacion.value = 'Selecciona entre 1 y 5 estrellas.'
+    return
+  }
+
+  try {
+    guardandoCalificacion.value = true
+    errorCalificacion.value = ''
+
+    const response = await calificarOperacion({
+      ofertaId: Number(operacionSeleccionada.value.id),
+      usuarioEvaluadorId: usuarioId,
+      puntuacion: Number(formCalificacion.value.puntuacion),
+      comentario: formCalificacion.value.comentario.trim() || null,
+    })
+
+    message.value = response.message || 'Calificación registrada correctamente.'
+    dialogCalificacion.value = false
+    operacionSeleccionada.value = null
+
+    await cargarHistorialP2P()
+  } catch (error) {
+    console.error(error)
+    errorCalificacion.value =
+      error.response?.data?.message ||
+      error.response?.data?.title ||
+      'No se pudo registrar la calificación.'
+  } finally {
+    guardandoCalificacion.value = false
+  }
 }
 
 onMounted(() => {
@@ -296,7 +510,12 @@ onMounted(() => {
 
 <style scoped>
 .historial-page {
+  min-height: 100%;
   background-color: #090c16;
+}
+
+.historial-panels {
+  background-color: transparent;
 }
 
 .historial-tabs .q-tab {
@@ -320,8 +539,6 @@ onMounted(() => {
 .historial-table td,
 .historial-table .q-th,
 .historial-table .q-td,
-.historial-table .q-table__middle .q-scrollarea__content,
-.historial-table .q-table__middle .q-scrollarea__container,
 .historial-table .q-table__bottom .q-btn,
 .historial-table .q-table__top .q-btn {
   background-color: #0f1620 !important;
@@ -349,16 +566,13 @@ onMounted(() => {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-.historial-table .q-tr:hover {
-  background-color: rgba(240, 185, 11, 0.08) !important;
-}
-
 .historial-table .q-badge,
 .historial-table .q-chip {
   font-weight: 600;
 }
 
-.historial-dialog-card {
+.historial-dialog-card,
+.calificacion-card {
   background-color: #121826;
   color: #e5e8ee;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -366,13 +580,14 @@ onMounted(() => {
 
 .voucher-image {
   width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
   border-radius: 12px;
 }
 
-.fecha-hora-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  line-height: 1.2;
+.calificacion-card {
+  width: 480px;
+  max-width: 95vw;
+  border-radius: 18px;
 }
 </style>
